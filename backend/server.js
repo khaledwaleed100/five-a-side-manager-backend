@@ -8,18 +8,19 @@ const { apiLimiter } = require('./middlewares/rateLimiter');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust Render's reverse proxy FIRST — must be before rate limiter
+app.set('trust proxy', 1);
+
 // Connect to Database
 connectDB();
 
-// Middleware
-app.use(express.json());
-app.use(helmet());
+// CORS — must be FIRST middleware before helmet and everything else
 const allowedOrigins = [
     'http://localhost:4200',
-    process.env.FRONTEND_URL, // e.g. https://your-app.vercel.app
+    process.env.FRONTEND_URL,
 ].filter(Boolean);
 
-app.use(cors({
+const corsOptions = {
     origin: (origin, callback) => {
         // Allow requests with no origin (mobile apps, curl, Render health checks)
         if (!origin || allowedOrigins.includes(origin)) {
@@ -28,12 +29,20 @@ app.use(cors({
             callback(new Error(`CORS: origin ${origin} not allowed`));
         }
     },
-    credentials: true
-}));
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
 
-// Trust Render/Vercel proxy so rate limiter sees real client IPs
-app.set('trust proxy', 1);
+// Handle OPTIONS preflight for ALL routes explicitly
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 
+// Security & parsing
+app.use(helmet());
+app.use(express.json());
+
+// Rate limiting
 app.use('/api', apiLimiter);
 
 // Routes
