@@ -31,6 +31,9 @@ app.use(cors({
     credentials: true
 }));
 
+// Trust Render/Vercel proxy so rate limiter sees real client IPs
+app.set('trust proxy', 1);
+
 app.use('/api', apiLimiter);
 
 // Routes
