@@ -23,15 +23,22 @@ const allowedOrigins = [
 const corsOptions = {
     origin: (origin, callback) => {
         // Allow requests with no origin (mobile apps, curl, Render health checks)
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin) return callback(null, true);
+        
+        // Check if origin is allowed or is a vercel.app subdomain for this project
+        const isAllowed = allowedOrigins.includes(origin) || 
+                         origin.includes('5-aside-xcsp') && origin.endsWith('.vercel.app');
+        
+        if (isAllowed) {
             callback(null, true);
         } else {
+            console.warn(`CORS blocked for origin: ${origin}`);
             callback(new Error(`CORS: origin ${origin} not allowed`));
         }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
 };
 
 // Handle OPTIONS preflight for ALL routes explicitly

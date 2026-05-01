@@ -15,6 +15,7 @@ const generateRefreshToken = (id) => {
 // @access  Public
 const registerUser = async (req, res, next) => {
     try {
+        console.log(`Registration attempt for email: ${req.body.email}`);
         const { email, password } = req.body;
 
         if (!email || !password) {
