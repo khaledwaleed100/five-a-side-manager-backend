@@ -14,8 +14,20 @@ connectDB();
 // Middleware
 app.use(express.json());
 app.use(helmet());
+const allowedOrigins = [
+    'http://localhost:4200',
+    process.env.FRONTEND_URL, // e.g. https://your-app.vercel.app
+].filter(Boolean);
+
 app.use(cors({
-    origin: 'http://localhost:4200', // Angular default
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, Render health checks)
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error(`CORS: origin ${origin} not allowed`));
+        }
+    },
     credentials: true
 }));
 
