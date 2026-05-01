@@ -1,0 +1,88 @@
+<div #cardRef [ngStyle]="getMagneticStyle(cardRef)" class="group w-56 h-80 perspective-1000 cursor-pointer relative" (click)="toggleFlip()">
+  
+  <!-- Action Buttons (Always Visible) -->
+  <div class="absolute top-2 right-2 flex flex-col gap-2 z-50">
+    <button *ngIf="showDelete" (click)="$event.stopPropagation(); onDelete($event)" class="bg-red-500/80 hover:bg-red-600 text-white p-1.5 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Delete">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+    </button>
+    <button *ngIf="showEdit" (click)="$event.stopPropagation(); onEdit($event)" class="bg-blue-500/80 hover:bg-blue-600 text-white p-1.5 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Edit">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+    </button>
+  </div>
+
+  <div class="relative w-full h-full transition-transform duration-700" 
+       [ngClass]="{
+         'preserve-3d': !isExporting,
+         'rotate-y-180': isFlipped() && !isExporting
+       }">
+    
+    <!-- Front of Card -->
+    <div class="absolute inset-0 w-full h-full rounded-2xl shadow-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-200 dark:from-slate-800 dark:to-slate-900 border-2 border-gray-300 dark:border-slate-700 flex flex-col transition-transform"
+         [ngClass]="{
+           'backface-hidden': !isExporting,
+           'hidden': isExporting && isFlipped()
+         }">
+      <!-- Header -->
+      <div class="h-2/5 flex flex-col justify-start p-4" [ngClass]="getPositionColor()">
+        <div class="text-3xl font-black text-white">{{ getOverallRating() }}</div>
+      </div>
+      
+      <!-- Body -->
+      <div class="flex-1 flex flex-col items-center justify-center p-4 relative">
+        <!-- Position Badge in Middle -->
+        <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 text-gray-900 dark:text-white font-bold px-3 py-1 rounded-full shadow-md text-sm border-2" [ngClass]="getPositionBorderColor()">
+          {{ player.position }}
+        </div>
+        
+        <!-- Player Avatar Placeholder -->
+        <div class="w-20 h-20 rounded-full bg-gray-300 dark:bg-slate-600 mt-2 mb-2 border-4 border-white dark:border-slate-800 shadow-md flex items-center justify-center overflow-hidden z-10">
+          <svg class="w-12 h-12 text-gray-400 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white text-center uppercase tracking-wider truncate w-full z-10">{{ player.name }}</h3>
+        
+        <div class="w-full mt-auto">
+          <div class="flex justify-between text-[10px] font-bold text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-2 tracking-tighter">
+            <span>PAC {{ player.attributes.speed }}</span>
+            <span>SHO {{ player.attributes.shooting }}</span>
+            <span>DEF {{ player.attributes.defending }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back of Card -->
+    <div class="absolute inset-0 w-full h-full rounded-2xl shadow-xl overflow-hidden bg-gradient-to-br from-gray-900 to-black text-white border-2 border-accent-light dark:border-accent-dark flex flex-col transition-transform"
+         [ngClass]="{
+           'backface-hidden rotate-y-180': !isExporting,
+           'hidden': isExporting && !isFlipped()
+         }">
+      <div class="p-4 flex flex-col h-full w-full">
+        <h3 class="text-lg font-bold text-center border-b border-gray-700 pb-2 mb-3 truncate w-full">{{ player.name }}</h3>
+        
+        <div class="grid grid-cols-2 gap-y-3 gap-x-2 text-sm font-medium w-full">
+          <div class="flex flex-col items-center">
+            <span class="text-gray-400 text-[10px] uppercase">Pace</span>
+            <span class="text-base text-accent-light dark:text-accent-dark">{{ player.attributes.speed }}</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="text-gray-400 text-[10px] uppercase">Shooting</span>
+            <span class="text-base text-accent-light dark:text-accent-dark">{{ player.attributes.shooting }}</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="text-gray-400 text-[10px] uppercase">Passing</span>
+            <span class="text-base text-accent-light dark:text-accent-dark">{{ player.attributes.passing }}</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="text-gray-400 text-[10px] uppercase">Defending</span>
+            <span class="text-base text-accent-light dark:text-accent-dark">{{ player.attributes.defending }}</span>
+          </div>
+          <div class="flex flex-col col-span-2 items-center border-t border-gray-700 pt-2 mt-1">
+            <span class="text-gray-400 text-[10px] uppercase">Physical</span>
+            <span class="text-lg font-bold text-accent-light dark:text-accent-dark">{{ player.attributes.physical }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

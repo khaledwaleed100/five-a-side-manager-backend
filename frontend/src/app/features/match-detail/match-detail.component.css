@@ -1,0 +1,27 @@
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.pitch-container {
+  /* Pattern for grass stripes */
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 10%,
+    rgba(255, 255, 255, 0.03) 10%,
+    rgba(255, 255, 255, 0.03) 20%
+  );
+}

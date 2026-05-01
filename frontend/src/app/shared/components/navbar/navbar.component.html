@@ -1,0 +1,90 @@
+<!-- Floating Pill Navbar -->
+<nav style="position: absolute; top: 1.5rem; left: 0; right: 0; z-index: 50;" class="px-4 pointer-events-none transition-all duration-300 opacity-100" [class.hidden]="!authService.isAuthenticated()">
+  <div class="max-w-4xl mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/40 dark:border-slate-700/50 rounded-[2rem] shadow-2xl p-3 flex justify-between items-center gap-4 pointer-events-auto transition-colors duration-500 relative">
+    
+    <!-- Logo area -->
+    <a routerLink="/matches" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
+      <div class="w-10 h-10 bg-gradient-to-br from-accent-light to-rose-600 dark:from-accent-dark dark:to-rose-400 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform rotate-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+      </div>
+      <div class="hidden sm:block">
+        <span class="text-lg font-black italic tracking-tighter text-gray-900 dark:text-white group-hover:text-accent-light dark:group-hover:text-accent-dark transition-colors">
+          5-A-SIDE<span class="text-accent-light dark:text-accent-dark">MGR</span>
+        </span>
+      </div>
+    </a>
+
+    <!-- Navigation Links -->
+    <div class="flex items-center justify-center gap-1 sm:gap-2 bg-gray-100/50 dark:bg-slate-800/50 p-1.5 rounded-2xl border border-gray-200/50 dark:border-slate-700/50 pointer-events-auto">
+      <a routerLink="/matches" routerLinkActive="bg-white dark:bg-slate-700 shadow-md text-accent-light dark:text-accent-dark" [routerLinkActiveOptions]="{exact: true}" class="px-4 py-2 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <span class="hidden md:inline">Matches</span>
+      </a>
+      
+      <!-- Admin Links -->
+      <a *ngIf="authService.currentUser()?.isAdmin" routerLink="/notes" routerLinkActive="bg-white dark:bg-slate-700 shadow-md text-accent-light dark:text-accent-dark" class="px-4 py-2 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+        <span class="hidden md:inline">Notes</span>
+      </a>
+      <a *ngIf="authService.currentUser()?.isAdmin" routerLink="/admin" routerLinkActive="bg-white dark:bg-slate-700 shadow-md text-accent-light dark:text-accent-dark" class="px-4 py-2 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        <span class="hidden md:inline">Dashboard</span>
+      </a>
+
+      <!-- Regular User Links -->
+      <a *ngIf="!authService.currentUser()?.isAdmin" routerLink="/feedback" routerLinkActive="bg-white dark:bg-slate-700 shadow-md text-accent-light dark:text-accent-dark" class="px-4 py-2 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        <span class="hidden md:inline">Feedback</span>
+      </a>
+
+      <a routerLink="/players" routerLinkActive="bg-white dark:bg-slate-700 shadow-md text-accent-light dark:text-accent-dark" class="px-4 py-2 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        <span class="hidden md:inline">Players</span>
+      </a>
+    </div>
+
+    <!-- Actions (Profile, Theme, Logout) -->
+    <div class="flex items-center gap-2 relative">
+      <button (click)="toggleTheme()" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">
+        <svg *ngIf="!isDarkMode()" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <svg *ngIf="isDarkMode()" class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+      </button>
+
+      <div class="relative">
+        <button (click)="toggleProfile()" class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold shadow-lg hover:scale-105 transition-transform">
+          {{ authService.currentUser()?.name?.charAt(0) || 'U' }}
+        </button>
+
+        <!-- Profile Dropdown/Modal inside navbar area -->
+        <div *ngIf="showProfileModal()" class="absolute right-0 mt-4 w-72 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 p-5 origin-top-right animate-scale-in">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-gray-900 dark:text-white">Profile</h3>
+            <button (click)="closeProfile()" class="text-gray-400 hover:text-red-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+          </div>
+          <div *ngIf="successMsg()" class="mb-3 text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 p-2 rounded-lg">{{ successMsg() }}</div>
+          <div *ngIf="errorMsg()" class="mb-3 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 p-2 rounded-lg">{{ errorMsg() }}</div>
+          <form (ngSubmit)="updateProfile()" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Name</label>
+              <input type="text" [(ngModel)]="profileForm.name" name="name" class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-accent-light outline-none transition-all dark:text-white">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">New Password (optional)</label>
+              <input type="password" [(ngModel)]="profileForm.password" name="password" class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-accent-light outline-none transition-all dark:text-white">
+            </div>
+            <button type="submit" [disabled]="isUpdating()" class="w-full py-2 bg-accent-light dark:bg-accent-dark text-white rounded-xl font-bold text-sm shadow-md disabled:opacity-50 hover:-translate-y-0.5 transition-transform flex justify-center items-center gap-2">
+              <svg *ngIf="isUpdating()" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              Save Changes
+            </button>
+          </form>
+          <div class="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+            <button (click)="logout()" class="w-full py-2 flex items-center justify-center gap-2 text-red-500 font-bold text-sm hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

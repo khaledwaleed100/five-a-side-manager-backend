@@ -1,0 +1,293 @@
+<div class="w-full text-gray-900 dark:text-white p-4 md:p-8 animate-fade-in font-sans selection:bg-accent-light/30">
+  
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-32">
+    <div class="w-16 h-16 border-4 border-accent-light border-t-transparent rounded-full animate-spin mb-4"></div>
+    <p class="text-gray-500 font-medium">Loading match data...</p>
+  </div>
+
+  <div *ngIf="!isLoading() && match() as m" class="max-w-[1400px] mx-auto space-y-6">
+    
+    <!-- Top Section: Add Players & Roster -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Add Players Panel -->
+      <div class="glass rounded-2xl p-6">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Add Players</h2>
+        <div class="flex gap-2 mb-6">
+          <button class="flex-1 bg-gray-200 dark:bg-[#334155] hover:bg-gray-300 dark:hover:bg-[#475569] text-sm font-medium py-2 rounded-lg transition-colors">Select Existing</button>
+          <a routerLink="/players" class="flex-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 text-sm font-medium py-2 rounded-lg transition-colors text-center">+ Create New</a>
+        </div>
+        
+        <div class="relative mb-4">
+          <input type="text" 
+                 [ngModel]="searchTerm()" 
+                 (ngModelChange)="searchTerm.set($event)"
+                 placeholder="Search your player pool..."
+                 class="w-full bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-[#334155] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500">
+        </div>
+        
+        <div class="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+          <div *ngFor="let p of availablePlayers()" (click)="addToRoster(p)" class="bg-gray-50 dark:bg-[#0f172a] p-3 rounded-xl border border-gray-200 dark:border-[#334155] hover:border-accent-light cursor-pointer transition-all flex justify-between items-center group">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded bg-gray-200 dark:bg-[#1e293b] flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-400">{{ p.overallRating }}</div>
+              <div>
+                <div class="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{{ p.name }}</div>
+                <div class="text-[10px] text-gray-500 uppercase">{{ p.position }}</div>
+              </div>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 dark:text-gray-600 group-hover:text-accent-light transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          </div>
+          <div *ngIf="availablePlayers().length === 0" class="text-center py-8 text-gray-500 text-sm">No players available.</div>
+        </div>
+      </div>
+
+      <!-- Match Roster Panel -->
+      <div class="lg:col-span-2 glass rounded-2xl p-6 flex flex-col">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-lg font-bold text-gray-900 dark:text-white">Match Roster</h2>
+          <div class="flex items-center gap-2 sm:gap-4">
+            <button (click)="exportImage()" [disabled]="isExporting()" class="text-[10px] sm:text-xs bg-indigo-500 hover:bg-indigo-600 text-white px-2 py-1.5 sm:px-3 rounded-lg font-bold transition-colors disabled:opacity-50 flex items-center gap-1 shadow-md hover:-translate-y-0.5">
+              <svg *ngIf="isExporting()" class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <svg *ngIf="!isExporting()" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+              <span class="hidden sm:inline">Export</span>
+            </button>
+            <button (click)="generateTeams()" [disabled]="m.roster.length < 2 || isGenerating()" class="text-[10px] sm:text-xs bg-accent-light hover:bg-accent-light/80 text-white px-2 py-1.5 sm:px-3 rounded-lg font-bold transition-colors disabled:opacity-50 shadow-md hover:-translate-y-0.5">
+              {{ isGenerating() ? 'Balancing...' : 'Auto-Balance' }}
+            </button>
+            <span class="bg-gray-200 dark:bg-[#334155] text-gray-600 dark:text-gray-300 text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-full font-medium">{{ m.roster.length }} Players</span>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[350px] overflow-y-auto custom-scrollbar pr-2">
+          <div *ngFor="let p of m.roster" class="bg-gray-50 dark:bg-[#0f172a] rounded-xl p-3 border border-gray-200 dark:border-[#334155] relative group">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <div class="font-bold text-sm text-gray-800 dark:text-gray-200">{{ p.name }}</div>
+                <div class="text-[10px] text-gray-500 uppercase">{{ p.position }} • OVR {{ p.overallRating }}</div>
+              </div>
+              <button (click)="removeFromRoster(p._id!)" class="text-red-500/50 hover:text-red-500 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <div class="flex items-center">
+              <select [ngModel]="isPlayerInTeam(p, m.teamA) ? 'A' : (isPlayerInTeam(p, m.teamB) ? 'B' : 'Unassigned')"
+                      (ngModelChange)="assignPlayer(p, $event)"
+                      class="bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-[#334155] rounded-md px-2 py-1 text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:border-accent-light transition-colors w-24 sm:w-28 cursor-pointer">
+                <option value="Unassigned">Unassigned</option>
+                <option value="A">Team A</option>
+                <option value="B">Team B</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>    <!-- Export Wrapper -->
+    <div #exportTemplate class="bg-transparent dark:bg-transparent rounded-[2rem] flex flex-col gap-6 pb-4">
+      
+      <!-- Unified Header & Stats Panel -->
+      <div class="glass rounded-3xl p-6 md:p-8 w-full flex flex-col gap-8 shadow-sm">
+        
+        <!-- Top Row: Info & Weather -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+          <div>
+            <h1 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-2">{{ m.place }}</h1>
+            <div class="flex items-center gap-4 text-sm font-bold text-gray-500">
+              <span class="flex items-center gap-1.5"><svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {{ m.date | date:'mediumDate' }}</span>
+              <span class="flex items-center gap-1.5"><svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> {{ m.date | date:'shortTime' }}</span>
+            </div>
+          </div>
+          
+          <!-- Weather Widget -->
+          <div class="mt-4 md:mt-0 flex items-center gap-3 bg-black/5 dark:bg-[#1e293b]/50 backdrop-blur-sm px-5 py-3 rounded-2xl border border-gray-200 dark:border-white/10">
+            <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+              <svg *ngIf="weather.icon === 'sun'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+              <svg *ngIf="weather.icon === 'cloud-sun'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+              <svg *ngIf="weather.icon === 'cloud-rain'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14.5A4.5 4.5 0 0014.5 10a4.5 4.5 0 00-4.5 4.5m4.5-4.5V3m-4.5 11.5v5m9-5v5m-4.5-5v5"></path></svg>
+              <svg *ngIf="weather.icon === 'cloud'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+            </div>
+            <div>
+              <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ weather.condition }}</div>
+              <div class="text-sm font-black text-gray-900 dark:text-white">{{ weather.temp }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="w-full h-px bg-gray-200 dark:bg-white/10 hidden md:block"></div>
+
+        <!-- Bottom Row: Full Width Stats -->
+        <div class="flex flex-col w-full">
+          <div class="flex justify-between items-center mb-6">
+            <div class="text-left w-32">
+              <div class="text-xl md:text-2xl font-black text-rose-500">TEAM A</div>
+              <div class="text-xs md:text-sm text-gray-500 font-bold uppercase tracking-wider">OVR {{ m.teamA | playerAvg }}</div>
+            </div>
+            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-xs md:text-sm font-black text-gray-500 border border-gray-200 dark:border-white/10 shadow-sm">VS</div>
+            <div class="text-right w-32">
+              <div class="text-xl md:text-2xl font-black text-blue-500">TEAM B</div>
+              <div class="text-xs md:text-sm text-gray-500 font-bold uppercase tracking-wider">OVR {{ m.teamB | playerAvg }}</div>
+            </div>
+          </div>
+
+          <!-- Custom Two-Sided Progress Bars -->
+          <div class="space-y-4 md:space-y-6 w-full md:px-4" *ngIf="teamAStats() as stA">
+            <div *ngIf="teamBStats() as stB">
+              <ng-container *ngTemplateOutlet="statBar; context: {label: 'Speed', a: stA.speed, b: stB.speed}"></ng-container>
+              <ng-container *ngTemplateOutlet="statBar; context: {label: 'Shooting', a: stA.shooting, b: stB.shooting}"></ng-container>
+              <ng-container *ngTemplateOutlet="statBar; context: {label: 'Passing', a: stA.passing, b: stB.passing}"></ng-container>
+              <ng-container *ngTemplateOutlet="statBar; context: {label: 'Defending', a: stA.defending, b: stB.defending}"></ng-container>
+              <ng-container *ngTemplateOutlet="statBar; context: {label: 'Physical', a: stA.physical, b: stB.physical}"></ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <!-- The Pitch Panel -->
+    <div class="w-full glass rounded-3xl p-2 md:p-8 relative overflow-hidden">
+      
+      <!-- Responsive Pitch Container -->
+      <div class="w-full relative aspect-[9/16] sm:aspect-[3/4] md:aspect-[21/9] min-h-[600px] md:min-h-[700px] bg-[#118a44] rounded border-[3px] md:border-[4px] border-[#118a44] shadow-inner overflow-hidden flex flex-col justify-center">
+        
+        <!-- Pitch Markings -->
+        <div class="absolute inset-2 md:inset-4 border-[1.5px] md:border-2 border-white/30 pointer-events-none rounded">
+          <!-- Center line (Horizontal on mobile, Vertical on desktop) -->
+          <div class="absolute top-1/2 left-0 right-0 h-[1.5px] md:top-0 md:bottom-0 md:left-1/2 md:-translate-x-1/2 md:w-0.5 md:h-full bg-white/30"></div>
+          
+          <!-- Center Circle -->
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 md:w-32 md:h-32 rounded-full border-[1.5px] md:border-2 border-white/30"></div>
+          
+          <!-- Team A Penalty Area (Top on mobile, Left on desktop) -->
+          <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[45%] h-[15%] border-[1.5px] md:border-2 border-t-0 border-white/30 flex items-start justify-center md:top-1/2 md:left-0 md:-translate-y-1/2 md:-translate-x-0 md:w-[15%] md:h-[45%] md:border-t-2 md:border-l-0 md:items-center md:justify-start">
+            <div class="w-[40%] h-[40%] border-[1.5px] md:border-2 border-t-0 border-white/30 md:w-1/2 md:h-[40%] md:border-t-2 md:border-l-0"></div>
+          </div>
+          
+          <!-- Team B Penalty Area (Bottom on mobile, Right on desktop) -->
+          <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[45%] h-[15%] border-[1.5px] md:border-2 border-b-0 border-white/30 flex items-end justify-center md:bottom-auto md:top-1/2 md:right-0 md:left-auto md:-translate-y-1/2 md:-translate-x-0 md:w-[15%] md:h-[45%] md:border-b-2 md:border-r-0 md:items-center md:justify-end">
+            <div class="w-[40%] h-[40%] border-[1.5px] md:border-2 border-b-0 border-white/30 md:w-1/2 md:h-[40%] md:border-b-2 md:border-r-0"></div>
+          </div>
+        </div>
+
+        <!-- Team Labels & VS Badge -->
+        <div class="absolute top-3 left-3 md:top-8 md:left-12 bg-[#0f172a]/80 px-4 py-1.5 md:px-6 md:py-2 rounded-full text-white font-black tracking-widest text-[9px] md:text-sm shadow-xl backdrop-blur-md border border-white/10 uppercase z-30">TEAM A</div>
+        <div class="absolute bottom-3 right-3 md:bottom-auto md:top-8 md:right-12 bg-[#0f172a]/80 px-4 py-1.5 md:px-6 md:py-2 rounded-full text-white font-black tracking-widest text-[9px] md:text-sm shadow-xl backdrop-blur-md border border-white/10 uppercase z-30">TEAM B</div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center font-black text-[#118a44] shadow-[0_0_20px_rgba(0,0,0,0.5)] border-[3px] md:border-[6px] border-[#118a44] z-30 text-sm md:text-xl tracking-tighter">VS</div>
+
+        <!-- FLEXBOX PERFECT ALIGNMENT PITCH GRID -->
+        <div class="absolute inset-0 z-10 flex flex-col md:flex-row px-1 md:px-6 py-4 md:py-2">
+          
+          <!-- Team A Half (Top on mobile, Left on desktop) -->
+          <div class="w-full h-1/2 md:w-1/2 md:h-full flex flex-col-reverse md:flex-row-reverse">
+            <!-- FWD Column (Pushed back slightly from center line) -->
+            <div class="flex-1 w-full md:w-auto h-auto md:h-full flex flex-row md:flex-col justify-center items-center gap-1 md:gap-4 py-1 md:py-8 mb-2 md:mb-0 md:mr-8">
+              <ng-container *ngFor="let p of getPlayersByPosition(m.teamA, 'FWD')">
+                <ng-container *ngTemplateOutlet="playerCard; context: {p: p}"></ng-container>
+              </ng-container>
+            </div>
+            <!-- MID Column -->
+            <div class="flex-1 w-full md:w-auto h-auto md:h-full flex flex-row md:flex-col justify-center items-center gap-1 md:gap-4 py-1 md:py-8">
+              <ng-container *ngFor="let p of getPlayersByPosition(m.teamA, 'MID')">
+                <ng-container *ngTemplateOutlet="playerCard; context: {p: p}"></ng-container>
+              </ng-container>
+            </div>
+            <!-- DEF Column -->
+            <div class="flex-1 w-full md:w-auto h-auto md:h-full flex flex-row md:flex-col justify-center items-center gap-1 md:gap-4 py-1 md:py-8">
+              <ng-container *ngFor="let p of getPlayersByPosition(m.teamA, 'DEF')">
+                <ng-container *ngTemplateOutlet="playerCard; context: {p: p}"></ng-container>
+              </ng-container>
+            </div>
+            <!-- GK Column -->
+            <div class="flex-1 w-full md:w-auto h-auto md:h-full flex flex-row md:flex-col justify-center items-center gap-1 md:gap-4 py-1 md:py-8">
+              <ng-container *ngFor="let p of getPlayersByPosition(m.teamA, 'GK')">
+                <ng-container *ngTemplateOutlet="playerCard; context: {p: p}"></ng-container>
+              </ng-container>
+            </div>
+          </div>
+
+          <!-- Team B Half (Bottom on mobile, Right on desktop) -->
+          <div class="w-full h-1/2 md:w-1/2 md:h-full flex flex-col md:flex-row">
+            <!-- FWD Column (Pushed back slightly from center line) -->
+            <div class="flex-1 w-full md:w-auto h-auto md:h-full flex flex-row md:flex-col justify-center items-center gap-1 md:gap-4 py-1 md:py-8 mt-2 md:mt-0 md:ml-8">
+              <ng-container *ngFor="let p of getPlayersByPosition(m.teamB, 'FWD')">
+                <ng-container *ngTemplateOutlet="playerCard; context: {p: p}"></ng-container>
+              </ng-container>
+            </div>
+            <!-- MID Column -->
+            <div class="flex-1 w-full md:w-auto h-auto md:h-full flex flex-row md:flex-col justify-center items-center gap-1 md:gap-4 py-1 md:py-8">
+              <ng-container *ngFor="let p of getPlayersByPosition(m.teamB, 'MID')">
+                <ng-container *ngTemplateOutlet="playerCard; context: {p: p}"></ng-container>
+              </ng-container>
+            </div>
+            <!-- DEF Column -->
+            <div class="flex-1 w-full md:w-auto h-auto md:h-full flex flex-row md:flex-col justify-center items-center gap-1 md:gap-4 py-1 md:py-8">
+              <ng-container *ngFor="let p of getPlayersByPosition(m.teamB, 'DEF')">
+                <ng-container *ngTemplateOutlet="playerCard; context: {p: p}"></ng-container>
+              </ng-container>
+            </div>
+            <!-- GK Column -->
+            <div class="flex-1 w-full md:w-auto h-auto md:h-full flex flex-row md:flex-col justify-center items-center gap-1 md:gap-4 py-1 md:py-8">
+              <ng-container *ngFor="let p of getPlayersByPosition(m.teamB, 'GK')">
+                <ng-container *ngTemplateOutlet="playerCard; context: {p: p}"></ng-container>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- End Export Wrapper -->
+    </div>
+  </div>
+</div>
+
+<!-- TEMPLATES -->
+<ng-template #statBar let-label="label" let-a="a" let-b="b">
+  <div class="relative">
+    <div class="flex justify-between text-[10px] md:text-xs font-bold text-gray-600 dark:text-gray-400 uppercase mb-1.5 md:mb-2">
+      <span class="text-rose-500">{{ a }}</span>
+      <span class="tracking-widest">{{ label }}</span>
+      <span class="text-blue-500">{{ b }}</span>
+    </div>
+    <div class="flex h-2.5 md:h-3 w-full gap-1.5">
+      <div class="flex-1 bg-black/10 dark:bg-black/30 rounded-l-full overflow-hidden flex justify-end">
+        <div class="bg-rose-500 h-full rounded-l-full" [style.width.%]="a"></div>
+      </div>
+      <div class="flex-1 bg-black/10 dark:bg-black/30 rounded-r-full overflow-hidden">
+        <div class="bg-blue-500 h-full rounded-r-full" [style.width.%]="b"></div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #playerCard let-p="p">
+  <div class="w-16 h-24 sm:w-20 sm:h-28 md:w-[6.5rem] md:h-[9.5rem] z-10 shrink-0">
+    <div class="relative w-full h-full bg-[#0f172a] rounded-lg overflow-hidden flex flex-col border border-[#1e293b] shadow-2xl hover:scale-105 transition-transform">
+      <div class="h-[45%] w-full p-1.5 md:p-2 relative flex justify-between items-start"
+           [ngClass]="{
+             'bg-rose-500': p.position === 'FWD',
+             'bg-[#3b82f6]': p.position === 'DEF',
+             'bg-[#22c55e]': p.position === 'MID',
+             'bg-[#eab308]': p.position === 'GK'
+           }">
+        <span class="text-white font-black text-xs sm:text-sm md:text-base leading-none">{{ p.overallRating }}</span>
+        <span class="text-white font-bold text-[7px] sm:text-[8px] md:text-[10px] uppercase leading-none">{{ p.position }}</span>
+        
+        <button (click)="assignPlayer(p, 'Unassigned')" class="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-red-500 hover:bg-red-600 rounded-full border border-white flex items-center justify-center shadow-sm hover:scale-110 transition-all cursor-pointer z-50 group">
+          <svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="absolute -bottom-4 md:-bottom-5 left-1/2 -translate-x-1/2 w-8 h-8 md:w-10 md:h-10 bg-[#334155] rounded-full border-2 border-[#0f172a] flex items-center justify-center shadow-lg">
+          <svg class="w-4 h-4 md:w-5 md:h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </div>
+      </div>
+      
+      <div class="flex-1 pt-4 sm:pt-5 md:pt-6 pb-1 md:pb-2 px-1 text-center bg-[#0f172a] flex flex-col justify-between">
+        <div class="text-white font-black text-[9px] md:text-[10px] lg:text-xs uppercase truncate px-1">{{ p.name.split(' ')[0] }}</div>
+        <div class="flex justify-center gap-1 md:gap-2 text-[6px] sm:text-[7px] md:text-[8px] font-bold text-gray-400">
+          <span class="flex flex-col">PAC<span class="text-white leading-none mt-0.5">{{ p.attributes.speed || 50 }}</span></span>
+          <span class="flex flex-col">SHO<span class="text-white leading-none mt-0.5">{{ p.attributes.shooting || 50 }}</span></span>
+          <span class="flex flex-col">DEF<span class="text-white leading-none mt-0.5">{{ p.attributes.defending || 50 }}</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
