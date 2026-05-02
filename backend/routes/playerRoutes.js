@@ -1,9 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const { getPlayers, createPlayer, updatePlayer, deletePlayer } = require('../controllers/playerController');
-const { protect } = require('../middlewares/authMiddleware');
+import { Router } from 'express';
+import { getPlayers, createPlayer, updatePlayer, deletePlayer } from '../controllers/playerController.js';
+import { protect } from '../middlewares/authMiddleware.js';
+
+
+const router = Router();
 
 router.route('/').get(protect, getPlayers).post(protect, createPlayer);
 router.route('/:id').put(protect, updatePlayer).delete(protect, deletePlayer);
 
-module.exports = router;
+export default router;

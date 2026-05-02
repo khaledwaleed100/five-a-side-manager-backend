@@ -74,7 +74,7 @@ import { environment } from '../../../environments/environment';
               <h2 class="text-xl font-bold text-gray-900 dark:text-white">User Feedback</h2>
             </div>
             <div class="p-6 space-y-4">
-              <div *ngIf="feedbacks()?.length === 0" class="text-center text-gray-500 py-8">
+              <div *ngIf="feedbacks().length === 0" class="text-center text-gray-500 py-8">
                 No feedback received yet.
               </div>
               <div *ngFor="let fb of feedbacks()" class="p-4 bg-gray-50 dark:bg-slate-900/50 rounded-xl border border-gray-200 dark:border-gray-700">

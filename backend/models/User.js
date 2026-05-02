@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
@@ -29,4 +29,11 @@ userSchema.methods.matchPassword = async function(enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.passwordHash);
 };
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+
+export default User;
+export const findOne = (query) => User.findOne(query);
+export const create = (data) => User.create(data);
+export const findById = (id) => User.findById(id);
+export const find = (query) => User.find(query);
+export const countDocuments = () => User.countDocuments();

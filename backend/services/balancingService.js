@@ -73,4 +73,4 @@ const balanceTeams = (players) => {
     return { teamA, teamB, totalRatingA, totalRatingB };
 };
 
-module.exports = { balanceTeams };
+export { balanceTeams };

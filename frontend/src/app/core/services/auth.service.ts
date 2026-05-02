@@ -20,7 +20,7 @@ export interface User {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private apiUrl = `${environment.apiUrl}/api/auth`;
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   currentUser = signal<User | null>(null);
   token = signal<string | null>(null);

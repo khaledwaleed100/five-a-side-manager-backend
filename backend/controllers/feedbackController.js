@@ -1,28 +1,25 @@
-const Feedback = require('../models/Feedback');
+import { create } from '../models/Feedback.js';
+import asyncHandler from '../middlewares/asyncHandler.js';
 
 // @desc    Add new feedback
 // @route   POST /api/feedback
 // @access  Private
-const createFeedback = async (req, res, next) => {
-    try {
-        const { message } = req.body;
+const createFeedback = asyncHandler(async (req, res, next) => {
+    const { message } = req.body;
 
-        if (!message) {
-            res.status(400);
-            throw new Error('Please add a message');
-        }
-
-        const feedback = await Feedback.create({
-            userId: req.user.id,
-            message
-        });
-
-        res.status(201).json(feedback);
-    } catch (error) {
-        next(error);
+    if (!message) {
+        res.status(400);
+        throw new Error('Please add a message');
     }
-};
 
-module.exports = {
+    const feedback = await create({
+        userId: req.user.id,
+        message
+    });
+
+    res.status(201).json(feedback);
+});
+
+export  {
     createFeedback
 };

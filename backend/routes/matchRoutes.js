@@ -1,7 +1,10 @@
-const express = require('express');
-const router = express.Router();
-const { getMatches, getMatch, createMatch, updateMatch, deleteMatch, generateTeams } = require('../controllers/matchController');
-const { protect } = require('../middlewares/authMiddleware');
+import { Router } from 'express';
+// Replace these function names with the actual ones inside your matchController!
+import { getMatches,getMatch, generateTeams, createMatch, updateMatch, deleteMatch } from '../controllers/matchController.js';
+import { protect } from '../middlewares/authMiddleware.js';
+
+
+const router = Router();
 
 router.route('/')
     .get(protect, getMatches)
@@ -14,4 +17,4 @@ router.route('/:id')
 
 router.post('/:id/generate', protect, generateTeams);
 
-module.exports = router;
+export default router;

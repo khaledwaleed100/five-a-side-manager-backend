@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const playerSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -20,4 +20,11 @@ playerSchema.pre('save', function() {
     this.overallRating = Math.round((speed + shooting + passing + defending + physical) / 5);
 });
 
-module.exports = mongoose.model('Player', playerSchema);
+const Player = mongoose.model('Player', playerSchema);
+
+export default Player;
+export const find = (query) => Player.find(query);
+export const create = (data) => Player.create(data);
+export const findById = (id) => Player.findById(id);
+export const findByIdAndUpdate = (id, data) => Player.findByIdAndUpdate(id, data, { new: true });
+export const countDocuments = () => Player.countDocuments();

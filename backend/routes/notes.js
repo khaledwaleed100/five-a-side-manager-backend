@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import Note from '../models/Note.js';
+import { protect, isAdmin } from '../middlewares/authMiddleware.js';
+
 const router = express.Router();
-const Note = require('../models/Note');
-const { protect, isAdmin } = require('../middlewares/authMiddleware');
 
 // Get all notes for the current admin
 router.get('/', protect, isAdmin, async (req, res) => {
@@ -52,4 +53,4 @@ router.delete('/:id', protect, isAdmin, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

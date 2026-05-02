@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const matchSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -14,4 +14,11 @@ const matchSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Match', matchSchema);
+const Match = mongoose.model('Match', matchSchema);
+
+export default Match;
+export const find = (query) => Match.find(query);
+export const findOne = (query) => Match.findOne(query);
+export const create = (data) => Match.create(data);
+export const findById = (id) => Match.findById(id);
+export const findByIdAndUpdate = (id, data) => Match.findByIdAndUpdate(id, data, { new: true });
