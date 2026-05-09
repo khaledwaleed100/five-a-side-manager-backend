@@ -30,6 +30,16 @@ export class RegisterComponent {
 
   error = signal('');
   isLoading = signal(false);
+  showPassword = signal(false);
+  showConfirmPassword = signal(false);
+
+  togglePassword() {
+    this.showPassword.update(v => !v);
+  }
+
+  toggleConfirmPassword() {
+    this.showConfirmPassword.update(v => !v);
+  }
 
   onSubmit() {
     if (!this.email || !this.password || !this.confirmPassword || !this.selectedQuestion || !this.securityAnswer) return;

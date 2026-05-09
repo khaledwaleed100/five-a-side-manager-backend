@@ -18,6 +18,11 @@ export class LoginComponent {
   password = '';
   error = signal('');
   isLoading = signal(false);
+  showPassword = signal(false);
+
+  togglePassword() {
+    this.showPassword.update(v => !v);
+  }
 
   onSubmit() {
     if (!this.email || !this.password) return;
