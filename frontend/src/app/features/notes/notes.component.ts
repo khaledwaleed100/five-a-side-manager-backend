@@ -76,7 +76,7 @@ export class NotesComponent implements OnInit {
 
   fetchNotes() {
     this.isFetching.set(true);
-    this.http.get(`${this.apiUrl}/api/notes`, { withCredentials: true })
+    this.http.get(`${this.apiUrl}/notes`, { withCredentials: true })
       .subscribe({
         next: (data: any) => {
           this.notes.set(data);
@@ -95,7 +95,7 @@ export class NotesComponent implements OnInit {
     this.successMessage.set('');
     this.errorMessage.set('');
 
-    this.http.post(`${this.apiUrl}/api/notes`, { content: this.content }, { withCredentials: true })
+    this.http.post(`${this.apiUrl}/notes`, { content: this.content }, { withCredentials: true })
       .subscribe({
         next: (newNote: any) => {
           this.isLoading.set(false);
@@ -115,7 +115,7 @@ export class NotesComponent implements OnInit {
   deleteNote(id: string) {
     if(!confirm('Are you sure you want to delete this note?')) return;
     
-    this.http.delete(`${this.apiUrl}/api/notes/${id}`, { withCredentials: true })
+    this.http.delete(`${this.apiUrl}/notes/${id}`, { withCredentials: true })
       .subscribe({
         next: () => {
           this.notes.update(current => current.filter(note => note._id !== id));

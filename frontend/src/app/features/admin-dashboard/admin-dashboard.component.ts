@@ -109,15 +109,15 @@ export class AdminDashboardComponent implements OnInit {
     this.isLoading.set(true);
     
     // Check stats to see if user is admin
-    this.http.get(`${this.apiUrl}/api/admin/stats`, { withCredentials: true }).subscribe({
+    this.http.get(`${this.apiUrl}/admin/stats`, { withCredentials: true }).subscribe({
       next: (statsData: any) => {
         this.stats.set(statsData);
         
-        this.http.get(`${this.apiUrl}/api/admin/users`, { withCredentials: true }).subscribe((usersData: any) => {
+        this.http.get(`${this.apiUrl}/admin/users`, { withCredentials: true }).subscribe((usersData: any) => {
           this.users.set(usersData);
         });
         
-        this.http.get(`${this.apiUrl}/api/admin/feedback`, { withCredentials: true }).subscribe((fbData: any) => {
+        this.http.get(`${this.apiUrl}/admin/feedback`, { withCredentials: true }).subscribe((fbData: any) => {
           this.feedbacks.set(fbData);
           this.isLoading.set(false);
         });

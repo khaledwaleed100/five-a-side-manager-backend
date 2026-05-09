@@ -27,7 +27,7 @@ export class PlayerService {
   private http = inject(HttpClient);
   private offlineSync = inject(OfflineSyncService);
   private authService = inject(AuthService);
-  private apiUrl = `${environment.apiUrl}/api/players`;
+  private apiUrl = `${environment.apiUrl}/players`;
 
   players = signal<Player[]>([]);
 

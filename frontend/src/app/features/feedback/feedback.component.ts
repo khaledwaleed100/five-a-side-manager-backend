@@ -50,7 +50,7 @@ export class FeedbackComponent {
     this.successMessage.set('');
     this.errorMessage.set('');
 
-    this.http.post(`${environment.apiUrl}/api/feedback`, { message: this.message }, { withCredentials: true })
+    this.http.post(`${environment.apiUrl}/feedback`, { message: this.message }, { withCredentials: true })
       .subscribe({
         next: () => {
           this.isLoading.set(false);

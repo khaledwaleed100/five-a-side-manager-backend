@@ -24,7 +24,7 @@ export interface Match {
 })
 export class MatchService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/api/matches`;
+  private apiUrl = `${environment.apiUrl}/matches`;
 
   getMatches(): Observable<Match[]> {
     return this.http.get<Match[]>(this.apiUrl);
