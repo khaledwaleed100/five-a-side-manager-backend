@@ -23,8 +23,6 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.2.0",
-    "mongoose": "^9.5.0",
-    "redis": "^4.7.0",
-    "rate-limit-redis": "^4.2.0"
+    "mongoose": "^9.5.0"
   }
 }
