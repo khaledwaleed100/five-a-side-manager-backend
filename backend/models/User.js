@@ -16,19 +16,14 @@ const userSchema = new mongoose.Schema({
     tempResetTokenExpire: Date
 }, { timestamps: true });
 
-userSchema.pre('save', async function(next) {
-    try {
-        if (this.isModified('passwordHash')) {
-            const salt = await bcrypt.genSalt(10);
-            this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
-        }
-        if (this.isModified('securityAnswerHash')) {
-            const salt = await bcrypt.genSalt(10);
-            this.securityAnswerHash = await bcrypt.hash(this.securityAnswerHash, salt);
-        }
-        next();
-    } catch (err) {
-        next(err);
+userSchema.pre('save', async function() {
+    if (this.isModified('passwordHash')) {
+        const salt = await bcrypt.genSalt(10);
+        this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
+    }
+    if (this.isModified('securityAnswerHash')) {
+        const salt = await bcrypt.genSalt(10);
+        this.securityAnswerHash = await bcrypt.hash(this.securityAnswerHash, salt);
     }
 });
 
