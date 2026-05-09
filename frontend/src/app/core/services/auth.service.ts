@@ -40,8 +40,8 @@ export class AuthService {
     }
   }
 
-  register(email: string, password: string, name?: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, { email, password, name });
+  register(email: string, password: string, name?: string, securityQuestion?: string, securityAnswer?: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/register`, { email, password, name, securityQuestion, securityAnswer });
   }
 
   login(email: string, password: string): Observable<any> {
@@ -80,12 +80,16 @@ export class AuthService {
     );
   }
 
-  forgotPassword(email: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/forgot-password`, { email });
+  getSecurityQuestion(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/security-question`, { email });
   }
 
-  resetPassword(token: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/resetpassword/${token}`, { password });
+  verifySecurityAnswer(email: string, securityAnswer: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/verify-security-answer`, { email, securityAnswer });
+  }
+
+  resetPasswordWithToken(email: string, resetToken: string, newPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reset-password`, { email, resetToken, newPassword });
   }
 
   clearSession() {

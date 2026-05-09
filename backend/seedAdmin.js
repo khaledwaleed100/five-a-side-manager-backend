@@ -20,6 +20,8 @@ const seedAdmin = async () => {
             adminUser = await User.create({
                 email: adminEmail,
                 passwordHash: adminPassword,
+                securityQuestion: "What is the admin override code?",
+                securityAnswerHash: "admin123", // Will be hashed by pre-save hook
                 isAdmin: true
             });
             console.log('Admin user created successfully.');

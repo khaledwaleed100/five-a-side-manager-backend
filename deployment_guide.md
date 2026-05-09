@@ -1,68 +1,42 @@
-# Deployment Guide: 5-A-Side Manager
+# Deployment Guide: 5-A-Side Manager (Unified Deployment)
 
-Follow these steps to deploy your full-stack application to production.
+We have simplified the deployment process! Instead of deploying the frontend and backend separately (which causes CORS and cookie issues), we will deploy them together as a **single application** on Render.
 
-## 1. Backend Deployment (Node.js & MongoDB)
+## Prerequisites
 
-We recommend using **Render**, **Railway**, or **Vercel** for the backend.
+1. A **MongoDB Atlas** account (free tier is fine).
+2. A **Render.com** account (free tier is fine).
+3. A GitHub repository containing the entire `five-a-side-manager` project.
 
-### Prerequisites
+## Step 1: Push to GitHub
+Ensure both the `frontend` and `backend` folders are pushed to your GitHub repository in the main root folder.
 
-- A **MongoDB Atlas** account (free tier is fine).
-- Get your connection string (e.g., `mongodb+srv://...`).
+## Step 2: Deploy to Render
 
-### Steps
+1. Go to Render.com and create a new **Web Service**.
+2. Connect your GitHub repository.
+3. Configure the service with the following settings:
+   - **Name**: `five-a-side-manager`
+   - **Environment**: `Node`
+   - **Root Directory**: `backend` (⚠️ **CRITICAL STEP**)
+   - **Build Command**: `npm run build`
+     *(This will install backend dependencies, then automatically switch to the frontend, install frontend dependencies, and build the Angular app.)*
+   - **Start Command**: `npm start`
+     *(This starts the Express server, which will now also serve your Angular app!)*
 
-1. **Prepare Environment Variables**:
-   Set the following variables in your hosting provider's dashboard:
-   - `PORT`: `3000` (or leave as default)
-   - `MONGO_URI`: Your MongoDB Atlas string.
-   - `JWT_SECRET`: A long random string (e.g., `openssl rand -base64 32`).
-   - `REFRESH_TOKEN_SECRET`: Another long random string.
-   - `NODE_ENV`: `production`
+## Step 3: Environment Variables
+Add the following Environment Variables in the Render dashboard for your service:
 
-2. **Deploy to Render/Railway**:
-   - Connect your GitHub repository.
-   - Set Build Command: `npm install` (in the `backend` folder).
-   - Set Start Command: `node server.js`.
+- `PORT`: `3000` (Optional)
+- `MONGO_URI`: Your MongoDB Atlas connection string.
+- `JWT_SECRET`: A secure random string (e.g., `my_super_secret_jwt_key_123`).
+- `REFRESH_TOKEN_SECRET`: A secure random string.
+- `NODE_ENV`: `production`
 
----
+## Step 4: Done!
+Once Render finishes building, your app will be live at `https://five-a-side-manager-xxxxx.onrender.com`.
 
-## 2. Frontend Deployment (Angular PWA)
-
-We recommend **Vercel** or **Firebase Hosting**.
-
-### Steps
-
-1. **Update Production Environment**:
-   Modify `frontend/src/environments/environment.prod.ts`:
-
-   ```typescript
-   export const environment = {
-     production: true,
-     apiUrl: "https://your-backend-url.com", // Use your deployed backend URL
-   };
-   ```
-
-2. **Build for Production**:
-   Run the following command in the `frontend` folder:
-
-   ```bash
-   npm run build --prod
-   ```
-
-   This generates a `dist/` folder containing the static files and the Service Worker.
-
-3. **Deploy to Vercel**:
-   - Connect your GitHub repository.
-   - Framework Preset: **Angular**.
-   - Output Directory: `dist/frontend/browser` (verify this path in your `angular.json`).
-   - Build Command: `npm run build`.
-
----
-
-## 3. Post-Deployment Checklist
-
-- [ ] **CORS**: Ensure your backend `server.js` allows requests from your frontend domain.
-- [ ] **PWA**: Verify the manifest and service worker load correctly via Chrome DevTools -> Application tab.
-- [ ] **HTTPS**: Ensure both are served over HTTPS for the PWA features to work.
+### Why is this better?
+- **No CORS Issues**: The frontend and backend are on the exact same domain.
+- **No Cross-Origin Cookies**: Secure HttpOnly cookies work flawlessly without complex same-site proxy configurations.
+- **One Build Process**: You click "Deploy" once, and it builds everything.

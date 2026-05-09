@@ -17,11 +17,22 @@ export class RegisterComponent {
   email = '';
   password = '';
   confirmPassword = '';
+  
+  securityQuestions = [
+    'What was your childhood nickname?',
+    'What is the name of your favorite childhood friend?',
+    'In what city or town did your mother and father meet?',
+    'What is your favorite football team?',
+    'What was the make of your first car?'
+  ];
+  selectedQuestion = '';
+  securityAnswer = '';
+
   error = signal('');
   isLoading = signal(false);
 
   onSubmit() {
-    if (!this.email || !this.password || !this.confirmPassword) return;
+    if (!this.email || !this.password || !this.confirmPassword || !this.selectedQuestion || !this.securityAnswer) return;
     if (!this.email.endsWith('@five.com')) {
       this.error.set('Email must belong to the @five.com domain');
       return;
@@ -34,7 +45,7 @@ export class RegisterComponent {
     this.isLoading.set(true);
     this.error.set('');
 
-    this.authService.register(this.email, this.password).subscribe({
+    this.authService.register(this.email, this.password, undefined, this.selectedQuestion, this.securityAnswer).subscribe({
       next: () => {
         // Auto login after register
         this.authService.login(this.email, this.password).subscribe({

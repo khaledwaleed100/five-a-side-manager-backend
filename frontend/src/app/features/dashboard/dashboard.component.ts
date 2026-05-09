@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlayerService, Player } from '../../core/services/player.service';
 import { PlayerCardComponent } from '../../shared/components/player-card/player-card.component';
+import { WeatherService, WeatherData } from '../../core/services/weather.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,6 +13,9 @@ import { PlayerCardComponent } from '../../shared/components/player-card/player-
 })
 export class DashboardComponent implements OnInit {
   playerService = inject(PlayerService);
+  weatherService = inject(WeatherService);
+
+  weatherData = signal<WeatherData | null>(null);
 
   showAddForm = signal(false);
   isEditing = signal(false);
@@ -27,6 +31,12 @@ export class DashboardComponent implements OnInit {
     this.playerService.getPlayers().subscribe();
     // Trigger sync just in case
     this.playerService.syncOfflinePlayers();
+
+    // Fetch current weather
+    this.weatherService.getWeather().subscribe({
+      next: (data) => this.weatherData.set(data),
+      error: (err) => console.error('Failed to load weather data', err)
+    });
   }
 
   toggleAddForm() {

@@ -2,6 +2,8 @@ import 'dotenv/config.js';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { default as connectDB } from './config/db.js';
 import { apiLimiter } from './middlewares/rateLimiter.js';
 import authRoutes from './routes/authRoutes.js';
@@ -12,6 +14,10 @@ import adminRoutes from './routes/adminRoutes.js';
 import notesRoutes from './routes/notes.js';
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
 import cookieParser from 'cookie-parser';
+
+// Resolve directory name
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Global Process Error Handlers
 process.on('uncaughtException', (err) => {
@@ -61,11 +67,23 @@ app.options(/.*/, cors(corsOptions));
 app.use(cors(corsOptions));
 
 // Security & parsing
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false, // Important: Sometimes helmet blocks Angular from loading its own scripts
+    crossOriginEmbedderPolicy: false
+}));
 app.use(express.json());
 app.use(cookieParser());
 // Rate limiting
 app.use('/api', apiLimiter);
+
+// Health check endpoint (no rate limit)
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -74,6 +92,18 @@ app.use('/api/matches', matchRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notes', notesRoutes);
+
+// Serve Frontend in Production / Unified Deployment
+const frontendPath = path.join(__dirname, '../frontend/dist/frontend/browser');
+app.use(express.static(frontendPath));
+
+app.get('*', (req, res, next) => {
+    // If it's an API route that wasn't found, let the notFound middleware handle it
+    if (req.originalUrl.startsWith('/api')) {
+        return next();
+    }
+    res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // Error handling middlewares
 app.use(notFound);
@@ -90,6 +120,11 @@ if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
         server.close(() => {
             process.exit(1);
         });
+    });
+} else if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
+    // In production on Render/Heroku etc., start the server normally
+    const server = app.listen(PORT, () => {
+        console.log(`Production Server running on port ${PORT}`);
     });
 }
 

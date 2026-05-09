@@ -17,9 +17,9 @@ const generateRefreshToken = (id) => {
 // @access  Public
 const registerUser = asyncHandler(async (req, res, next) => {
     console.log(`Registration attempt for email: ${req.body.email}`);
-    const { email, password } = req.body;
+    const { email, password, securityQuestion, securityAnswer } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !securityQuestion || !securityAnswer) {
         res.status(400);
         throw new Error('Please add all fields');
     }
@@ -39,7 +39,9 @@ const registerUser = asyncHandler(async (req, res, next) => {
     const user = await User.create({
         name: req.body.name || 'Manager',
         email,
-        passwordHash: password // will be hashed in pre-save middleware
+        passwordHash: password, // will be hashed in pre-save middleware
+        securityQuestion,
+        securityAnswerHash: securityAnswer.toLowerCase().trim()
     });
 
     if (user) {
@@ -59,6 +61,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = asyncHandler(async (req, res, next) => {
+    const startTime = Date.now();
     const { email, password } = req.body;
 
     if (!email || !email.endsWith('@five.com')) {
@@ -66,14 +69,20 @@ const loginUser = asyncHandler(async (req, res, next) => {
         throw new Error('Invalid credentials');
     }
 
+    console.time(`[LOGIN] Query user by email: ${email}`);
     const user = await User.findOne({ email });
+    console.timeEnd(`[LOGIN] Query user by email: ${email}`);
 
     if (user && (await user.matchPassword(password))) {
+        console.time(`[LOGIN] Generate tokens`);
         const accessToken = generateAccessToken(user._id);
         const refreshToken = generateRefreshToken(user._id);
+        console.timeEnd(`[LOGIN] Generate tokens`);
 
+        console.time(`[LOGIN] Save refresh token`);
         user.refreshToken = refreshToken;
         await user.save();
+        console.timeEnd(`[LOGIN] Save refresh token`);
 
         // Set refresh token as HTTP-only cookie
         res.cookie('refreshToken', refreshToken, {
@@ -83,6 +92,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
+        console.log(`[LOGIN] Success for ${email} - Total time: ${Date.now() - startTime}ms`);
         res.json({
             _id: user.id,
             name: user.name,
@@ -92,6 +102,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
             accessToken
         });
     } else {
+        console.log(`[LOGIN] Failed for ${email} - Total time: ${Date.now() - startTime}ms`);
         res.status(401);
         throw new Error('Invalid credentials');
     }
@@ -168,59 +179,90 @@ const updateProfile = asyncHandler(async (req, res, next) => {
     }
 });
 
-// @desc    Forgot Password
-// @route   POST /api/auth/forgot-password
+// @desc    Get Security Question for Password Reset
+// @route   POST /api/auth/security-question
 // @access  Public
-const forgotPassword = asyncHandler(async (req, res, next) => {
-    const user = await User.findOne({ email: req.body.email });
+const getSecurityQuestion = asyncHandler(async (req, res, next) => {
+    const { email } = req.body;
+    if (!email) {
+        res.status(400);
+        throw new Error('Please provide an email');
+    }
+    
+    const user = await User.findOne({ email });
     if (!user) {
         res.status(404);
         throw new Error('There is no user with that email');
     }
+    
+    if (!user.securityQuestion) {
+        res.status(400);
+        throw new Error('This user does not have a security question set up. Please contact an admin.');
+    }
 
-    // Get reset token
-    const resetToken = randomBytes(20).toString('hex');
-
-    // Hash token and set to resetPasswordToken field
-    user.resetPasswordToken = createHash('sha256').update(resetToken).digest('hex');
-
-    // Set expire
-    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
-    await user.save();
-
-    // Create reset url
-    // Assuming frontend runs on same host or localhost:4200
-    const resetUrl = `http://localhost:4200/reset-password/${resetToken}`;
-
-    console.log('---------------------------------------------------------');
-    console.log(`PASSWORD RESET LINK FOR ${user.email}:`);
-    console.log(resetUrl);
-    console.log('---------------------------------------------------------');
-
-    res.status(200).json({ success: true, message: 'Email sent' });
+    res.status(200).json({ success: true, securityQuestion: user.securityQuestion });
 });
 
-// @desc    Reset Password
-// @route   POST /api/auth/resetpassword/:token
+// @desc    Verify Security Answer
+// @route   POST /api/auth/verify-security-answer
 // @access  Public
-const resetPassword = asyncHandler(async (req, res, next) => {
-    // Get hashed token
-    const resetPasswordToken = createHash('sha256').update(req.params.token).digest('hex');
+const verifySecurityAnswer = asyncHandler(async (req, res, next) => {
+    const { email, securityAnswer } = req.body;
+    
+    if (!email || !securityAnswer) {
+        res.status(400);
+        throw new Error('Please provide email and security answer');
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    const isMatch = await user.matchSecurityAnswer(securityAnswer);
+    if (!isMatch) {
+        res.status(401);
+        throw new Error('Incorrect security answer');
+    }
+
+    // Generate a temporary reset token
+    const tempResetToken = randomBytes(20).toString('hex');
+    user.tempResetToken = createHash('sha256').update(tempResetToken).digest('hex');
+    user.tempResetTokenExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+    await user.save();
+
+    res.status(200).json({ success: true, resetToken: tempResetToken });
+});
+
+// @desc    Reset Password with Token
+// @route   POST /api/auth/reset-password
+// @access  Public
+const resetPasswordWithToken = asyncHandler(async (req, res, next) => {
+    const { email, resetToken, newPassword } = req.body;
+
+    if (!email || !resetToken || !newPassword) {
+        res.status(400);
+        throw new Error('Please provide all fields');
+    }
+
+    const hashedToken = createHash('sha256').update(resetToken).digest('hex');
 
     const user = await User.findOne({
-        resetPasswordToken,
-        resetPasswordExpire: { $gt: Date.now() }
+        email,
+        tempResetToken: hashedToken,
+        tempResetTokenExpire: { $gt: Date.now() }
     });
 
     if (!user) {
         res.status(400);
-        throw new Error('Invalid or expired token');
+        throw new Error('Invalid or expired reset token');
     }
 
     // Set new password
-    user.passwordHash = req.body.password;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
+    user.passwordHash = newPassword;
+    user.tempResetToken = undefined;
+    user.tempResetTokenExpire = undefined;
     await user.save();
 
     res.status(200).json({ success: true, message: 'Password reset successful' });
@@ -232,6 +274,7 @@ export {
     refreshToken,
     logoutUser,
     updateProfile,
-    forgotPassword,
-    resetPassword
+    getSecurityQuestion,
+    verifySecurityAnswer,
+    resetPasswordWithToken
 };
