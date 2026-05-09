@@ -121,7 +121,7 @@ import { MatchService, Match } from '../../core/services/match.service';
             </div>
           </div>
 
-          <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800 mt-auto">
+          <div class="pt-4 border-t border-gray-100 dark:border-gray-800 mt-auto">
             <a [routerLink]="['/matches', match._id]" 
                class="block w-full text-center py-2 bg-gray-100 dark:bg-gray-800 hover:bg-accent-light dark:hover:bg-accent-dark text-gray-700 dark:text-gray-200 hover:text-white font-medium rounded-lg transition-colors">
               Manage Match
