@@ -46,9 +46,9 @@ const corsOptions = {
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
         
-        // Update this string to match your actual Vercel project name
+        // Allow Vercel and Render dynamic URLs
         const isAllowed = allowedOrigins.includes(origin) || 
-                         origin.includes('five-a-side-manager') && origin.endsWith('.vercel.app');
+                         origin.includes('five-a-side-manager') && (origin.endsWith('.vercel.app') || origin.endsWith('.onrender.com'));
         
         if (isAllowed) {
             callback(null, true);
