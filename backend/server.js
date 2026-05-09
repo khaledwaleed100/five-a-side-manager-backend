@@ -97,12 +97,12 @@ app.use('/api/notes', notesRoutes);
 const frontendPath = path.join(__dirname, '../frontend/dist/frontend/browser');
 app.use(express.static(frontendPath));
 
-app.get('*', (req, res, next) => {
-    // If it's an API route that wasn't found, let the notFound middleware handle it
-    if (req.originalUrl.startsWith('/api')) {
-        return next();
+app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.originalUrl.startsWith('/api')) {
+        res.sendFile(path.join(frontendPath, 'index.html'));
+    } else {
+        next();
     }
-    res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 // Error handling middlewares
