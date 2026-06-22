@@ -48,7 +48,8 @@ const corsOptions = {
         
         // Allow Vercel and Render dynamic URLs
         const isAllowed = allowedOrigins.includes(origin) || 
-                         origin.includes('five-a-side-manager') && (origin.endsWith('.vercel.app') || origin.endsWith('.onrender.com'));
+                         origin.endsWith('.vercel.app') || 
+                         origin.endsWith('.onrender.com');
         
         if (isAllowed) {
             callback(null, true);
