@@ -26,10 +26,7 @@ export class LoginComponent {
 
   onSubmit() {
     if (!this.email || !this.password) return;
-    if (!this.email.endsWith('@five.com')) {
-      this.error.set('Email must belong to the @five.com domain');
-      return;
-    }
+    // Custom domain check removed
     this.isLoading.set(true);
     this.error.set('');
 
@@ -38,7 +35,7 @@ export class LoginComponent {
         this.isLoading.set(false);
         this.router.navigate(['/matches']);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isLoading.set(false);
         this.error.set(err.message || 'Login failed. Please check credentials.');
       }

@@ -43,10 +43,7 @@ export class RegisterComponent {
 
   onSubmit() {
     if (!this.email || !this.password || !this.confirmPassword || !this.selectedQuestion || !this.securityAnswer) return;
-    if (!this.email.endsWith('@five.com')) {
-      this.error.set('Email must belong to the @five.com domain');
-      return;
-    }
+    // Custom domain check removed
     if (this.password !== this.confirmPassword) {
       this.error.set('Passwords do not match');
       return;
@@ -63,13 +60,13 @@ export class RegisterComponent {
             this.isLoading.set(false);
             this.router.navigate(['/dashboard']);
           },
-          error: () => {
+          error: (err: any) => {
             this.isLoading.set(false);
             this.router.navigate(['/login']);
           }
         });
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isLoading.set(false);
         this.error.set(err.message || 'Registration failed.');
       }

@@ -9,15 +9,26 @@ const playerSchema = new mongoose.Schema({
         shooting: { type: Number, min: 1, max: 99, default: 50 },
         passing: { type: Number, min: 1, max: 99, default: 50 },
         defending: { type: Number, min: 1, max: 99, default: 50 },
-        physical: { type: Number, min: 1, max: 99, default: 50 }
+        physical: { type: Number, min: 1, max: 99, default: 50 },
+        stamina: { type: Number, min: 1, max: 99, default: 50 },
+        goalkeeping: { type: Number, min: 1, max: 99, default: 50 },
+        positioning: { type: Number, min: 1, max: 99, default: 50 },
+        longPass: { type: Number, min: 1, max: 99, default: 50 },
+        shortPass: { type: Number, min: 1, max: 99, default: 50 }
     },
     overallRating: { type: Number },
-    performanceTrend: { type: String, default: 'stable' }
+    performanceTrend: { type: String, default: 'stable' },
+    stats: {
+        matchesPlayed: { type: Number, default: 0 },
+        goals: { type: Number, default: 0 },
+        assists: { type: Number, default: 0 },
+        mvpAwards: { type: Number, default: 0 }
+    }
 }, { timestamps: true });
 
 playerSchema.pre('save', function() {
-    const { speed, shooting, passing, defending, physical } = this.attributes;
-    this.overallRating = Math.round((speed + shooting + passing + defending + physical) / 5);
+    const { speed, shooting, passing, defending, physical, stamina, goalkeeping, positioning, longPass, shortPass } = this.attributes;
+    this.overallRating = Math.round((speed + shooting + passing + defending + physical + stamina + goalkeeping + positioning + longPass + shortPass) / 10);
 });
 
 const Player = mongoose.model('Player', playerSchema);

@@ -59,26 +59,23 @@
       <div class="p-4 flex flex-col h-full w-full">
         <h3 class="text-lg font-bold text-center border-b border-gray-700 pb-2 mb-3 truncate w-full">{{ player.name }}</h3>
         
-        <div class="grid grid-cols-2 gap-y-3 gap-x-2 text-sm font-medium w-full">
+        <h4 class="text-xs text-center text-gray-500 uppercase tracking-widest mb-2">All-Time Stats</h4>
+        <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-sm font-medium w-full">
           <div class="flex flex-col items-center">
-            <span class="text-gray-400 text-[10px] uppercase">Pace</span>
-            <span class="text-base text-accent-light dark:text-accent-dark">{{ player.attributes.speed }}</span>
+            <span class="text-gray-400 text-[10px] uppercase">Matches</span>
+            <span class="text-xl font-black text-white">{{ player.stats?.matchesPlayed || 0 }}</span>
           </div>
           <div class="flex flex-col items-center">
-            <span class="text-gray-400 text-[10px] uppercase">Shooting</span>
-            <span class="text-base text-accent-light dark:text-accent-dark">{{ player.attributes.shooting }}</span>
+            <span class="text-gray-400 text-[10px] uppercase">Goals</span>
+            <span class="text-xl font-black text-accent-light dark:text-accent-dark">{{ player.stats?.goals || 0 }}</span>
           </div>
           <div class="flex flex-col items-center">
-            <span class="text-gray-400 text-[10px] uppercase">Passing</span>
-            <span class="text-base text-accent-light dark:text-accent-dark">{{ player.attributes.passing }}</span>
+            <span class="text-gray-400 text-[10px] uppercase">Assists</span>
+            <span class="text-xl font-black text-blue-400">{{ player.stats?.assists || 0 }}</span>
           </div>
           <div class="flex flex-col items-center">
-            <span class="text-gray-400 text-[10px] uppercase">Defending</span>
-            <span class="text-base text-accent-light dark:text-accent-dark">{{ player.attributes.defending }}</span>
-          </div>
-          <div class="flex flex-col col-span-2 items-center border-t border-gray-700 pt-2 mt-1">
-            <span class="text-gray-400 text-[10px] uppercase">Physical</span>
-            <span class="text-lg font-bold text-accent-light dark:text-accent-dark">{{ player.attributes.physical }}</span>
+            <span class="text-gray-400 text-[10px] uppercase">MVPs</span>
+            <span class="text-xl font-black text-yellow-400">{{ player.stats?.mvpAwards || 0 }}</span>
           </div>
         </div>
       </div>

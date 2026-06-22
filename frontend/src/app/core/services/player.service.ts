@@ -16,8 +16,19 @@ export interface Player {
     passing: number;
     defending: number;
     physical: number;
+    stamina: number;
+    goalkeeping: number;
+    positioning: number;
+    longPass: number;
+    shortPass: number;
   };
   overallRating?: number;
+  stats?: {
+    matchesPlayed: number;
+    goals: number;
+    assists: number;
+    mvpAwards: number;
+  };
 }
 
 @Injectable({
@@ -104,6 +115,6 @@ export class PlayerService {
   }
 
   private calculateRating(attrs: any): number {
-    return Math.floor((attrs.speed + attrs.shooting + attrs.passing + attrs.defending + attrs.physical) / 5);
+    return Math.floor((attrs.speed + attrs.shooting + attrs.passing + attrs.defending + attrs.physical + attrs.stamina + attrs.goalkeeping + attrs.positioning + attrs.longPass + attrs.shortPass) / 10);
   }
 }

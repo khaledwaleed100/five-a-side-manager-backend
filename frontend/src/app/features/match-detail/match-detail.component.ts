@@ -26,6 +26,11 @@ export class MatchDetailComponent implements OnInit {
   isGenerating = signal(false);
   isExporting = signal(false);
   searchTerm = signal('');
+  flippedCards = signal<Set<string>>(new Set());
+  showCompleteForm = signal(false);
+
+  finalScore = { teamA: 0, teamB: 0 };
+  playerStats: { [playerId: string]: { goals: number, assists: number, isMvp: boolean } } = {};
 
   weather = { condition: 'Loading...', description: 'Fetching weather', temp: '--°C', icon: 'sun' };
 
@@ -70,7 +75,7 @@ export class MatchDetailComponent implements OnInit {
       }
 
       const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-      const data = await res.json();
+      const data: any = await res.json();
       
       const temp = Math.round(data.current_weather.temperature);
       const code = data.current_weather.weathercode;
@@ -130,7 +135,8 @@ export class MatchDetailComponent implements OnInit {
     return team.some(p => p._id === player._id);
   }
 
-  assignPlayer(player: Player, team: 'A' | 'B' | 'Unassigned') {
+  assignPlayer(player: Player, team: 'A' | 'B' | 'Unassigned', event?: Event) {
+    if (event) event.stopPropagation();
     if (!this.match()) return;
     
     const currentA = this.match()!.teamA || [];
@@ -153,6 +159,18 @@ export class MatchDetailComponent implements OnInit {
         this.match.set(updated);
       }
     });
+  }
+
+  toggleFlip(player: Player, event: Event) {
+    event.stopPropagation();
+    if (!player._id) return;
+    const current = new Set(this.flippedCards());
+    if (current.has(player._id)) {
+      current.delete(player._id);
+    } else {
+      current.add(player._id);
+    }
+    this.flippedCards.set(current);
   }
 
   loadData() {
@@ -199,6 +217,41 @@ export class MatchDetailComponent implements OnInit {
         this.isGenerating.set(false);
       },
       error: () => this.isGenerating.set(false)
+    });
+  }
+
+  openCompleteMatch() {
+    this.showCompleteForm.set(true);
+    const m = this.match();
+    if (m) {
+      [...(m.teamA || []), ...(m.teamB || [])].forEach(p => {
+        if (!this.playerStats[p._id!]) {
+          this.playerStats[p._id!] = { goals: 0, assists: 0, isMvp: false };
+        }
+      });
+    }
+  }
+
+  setMvp(playerId: string) {
+    Object.keys(this.playerStats).forEach(id => {
+      this.playerStats[id].isMvp = (id === playerId);
+    });
+  }
+
+  submitMatch() {
+    const statsArray = Object.keys(this.playerStats).map(id => ({
+      playerId: id,
+      ...this.playerStats[id]
+    }));
+    
+    this.matchService.completeMatch(this.matchId, {
+      finalScore: this.finalScore,
+      playerStats: statsArray
+    }).subscribe({
+      next: (updated) => {
+        this.match.set(updated);
+        this.showCompleteForm.set(false);
+      }
     });
   }
 

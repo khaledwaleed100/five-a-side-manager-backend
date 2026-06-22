@@ -76,7 +76,7 @@ export class NavbarComponent implements OnInit {
         this.profileForm.password = ''; // clear password field
         setTimeout(() => this.closeProfile(), 1500);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isUpdating.set(false);
         this.errorMsg.set(err.error?.message || 'Update failed');
       }

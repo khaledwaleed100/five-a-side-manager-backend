@@ -119,11 +119,60 @@ const generateTeams = asyncHandler(async (req, res, next) => {
     res.json(updatedMatch);
 });
 
+// @desc    Complete a match and save stats
+// @route   POST /api/matches/:id/complete
+// @access  Private
+const completeMatch = asyncHandler(async (req, res, next) => {
+    const { finalScore, playerStats } = req.body;
+    
+    const match = await findOne({ _id: req.params.id, userId: req.user.id });
+    if (!match) {
+        res.status(404);
+        throw new Error('Match not found');
+    }
+
+    if (match.status === 'completed') {
+        res.status(400);
+        throw new Error('Match is already completed');
+    }
+
+    match.status = 'completed';
+    if (finalScore) match.finalScore = finalScore;
+    if (playerStats) match.playerStats = playerStats;
+
+    await match.save();
+
+    // Update all participating players' all-time stats
+    if (playerStats && playerStats.length > 0) {
+        for (const stat of playerStats) {
+            const player = await Player.findById(stat.playerId);
+            if (player) {
+                player.stats.matchesPlayed += 1;
+                player.stats.goals += stat.goals || 0;
+                player.stats.assists += stat.assists || 0;
+                if (stat.isMvp) {
+                    player.stats.mvpAwards += 1;
+                }
+                await player.save();
+            }
+        }
+    }
+
+    const updatedMatch = await findById(req.params.id)
+        .populate('roster')
+        .populate('teamA')
+        .populate('teamB')
+        .populate('playerStats.playerId');
+
+    res.json(updatedMatch);
+});
+
 export {
     getMatches,
     getMatch,
     createMatch,
     updateMatch,
     deleteMatch,
-    generateTeams
+    generateTeams,
+    completeMatch
 };

@@ -17,6 +17,13 @@ export interface Match {
     teamA: number;
     teamB: number;
   };
+  status?: 'upcoming' | 'completed';
+  playerStats?: {
+    playerId: string | Player;
+    goals: number;
+    assists: number;
+    isMvp: boolean;
+  }[];
 }
 
 @Injectable({
@@ -48,5 +55,9 @@ export class MatchService {
 
   generateTeams(id: string): Observable<Match> {
     return this.http.post<Match>(`${this.apiUrl}/${id}/generate`, {});
+  }
+
+  completeMatch(id: string, data: { finalScore: { teamA: number, teamB: number }, playerStats: any[] }): Observable<Match> {
+    return this.http.post<Match>(`${this.apiUrl}/${id}/complete`, data);
   }
 }

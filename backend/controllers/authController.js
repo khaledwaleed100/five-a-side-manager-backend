@@ -24,10 +24,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
         throw new Error('Please add all fields');
     }
 
-    if (!email.endsWith('@five.com')) {
-        res.status(400);
-        throw new Error('Email must end with @five.com');
-    }
+    // Custom domain check removed
 
     const userExists = await User.findOne({ email });
 
@@ -64,7 +61,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
     const startTime = Date.now();
     const { email, password } = req.body;
 
-    if (!email || !email.endsWith('@five.com')) {
+    if (!email) {
         res.status(401);
         throw new Error('Invalid credentials');
     }

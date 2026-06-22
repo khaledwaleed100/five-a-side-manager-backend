@@ -37,7 +37,7 @@ import { AuthService } from '../../../core/services/auth.service';
             <label for="email-address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
             <input id="email-address" name="email" type="email" required [(ngModel)]="email"
                    class="appearance-none relative block w-full px-4 py-3 border border-gray-300 dark:border-gray-700 placeholder-gray-500 text-gray-900 dark:text-white bg-gray-50 dark:bg-slate-900/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-light dark:focus:ring-accent-dark focus:border-transparent transition-all sm:text-sm" 
-                   placeholder="manager@five.com">
+                   placeholder="manager@example.com">
           </div>
           <div>
             <button type="submit" [disabled]="isLoading() || !email"

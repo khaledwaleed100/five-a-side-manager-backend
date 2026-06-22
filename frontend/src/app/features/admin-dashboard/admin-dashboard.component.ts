@@ -122,7 +122,7 @@ export class AdminDashboardComponent implements OnInit {
           this.isLoading.set(false);
         });
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Admin error:', err);
         this.router.navigate(['/matches']); // Redirect non-admins
       }

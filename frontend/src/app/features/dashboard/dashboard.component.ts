@@ -24,7 +24,7 @@ export class DashboardComponent implements OnInit {
   newPlayer: Player = {
     name: '',
     position: 'MID',
-    attributes: { speed: 50, shooting: 50, passing: 50, defending: 50, physical: 50 }
+    attributes: { speed: 50, shooting: 50, passing: 50, defending: 50, physical: 50, stamina: 50, goalkeeping: 50, positioning: 50, longPass: 50, shortPass: 50 }
   };
 
   ngOnInit() {
@@ -35,14 +35,18 @@ export class DashboardComponent implements OnInit {
     // Fetch current weather
     this.weatherService.getWeather().subscribe({
       next: (data) => this.weatherData.set(data),
-      error: (err) => console.error('Failed to load weather data', err)
+      error: (err: any) => console.error('Failed to load weather data', err)
     });
   }
 
   toggleAddForm() {
     this.isEditing.set(false);
     this.resetForm();
-    this.showAddForm.update(v => !v);
+    this.showAddForm.update(v => {
+      const next = !v;
+      document.body.style.overflow = next ? 'hidden' : '';
+      return next;
+    });
   }
 
   addPlayer() {
@@ -50,10 +54,12 @@ export class DashboardComponent implements OnInit {
     this.playerService.createPlayer({ ...this.newPlayer }).subscribe({
       next: () => {
         this.showAddForm.set(false);
+        document.body.style.overflow = '';
         this.resetForm();
       },
       error: () => {
         this.showAddForm.set(false);
+        document.body.style.overflow = '';
         this.resetForm();
       }
     });
@@ -64,6 +70,7 @@ export class DashboardComponent implements OnInit {
     this.playerService.updatePlayer(this.editingPlayerId()!, { ...this.newPlayer }).subscribe({
       next: () => {
         this.showAddForm.set(false);
+        document.body.style.overflow = '';
         this.isEditing.set(false);
         this.editingPlayerId.set(null);
         this.resetForm();
@@ -74,6 +81,7 @@ export class DashboardComponent implements OnInit {
   editPlayer = (player: Player) => {
     this.isEditing.set(true);
     this.showAddForm.set(true);
+    document.body.style.overflow = 'hidden';
     this.editingPlayerId.set(player._id || null);
     this.newPlayer = JSON.parse(JSON.stringify(player)); // deep copy to avoid direct binding mutations
   }
@@ -88,7 +96,7 @@ export class DashboardComponent implements OnInit {
     this.newPlayer = {
       name: '',
       position: 'MID',
-      attributes: { speed: 50, shooting: 50, passing: 50, defending: 50, physical: 50 }
+      attributes: { speed: 50, shooting: 50, passing: 50, defending: 50, physical: 50, stamina: 50, goalkeeping: 50, positioning: 50, longPass: 50, shortPass: 50 }
     };
   }
 

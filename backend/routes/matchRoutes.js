@@ -1,6 +1,6 @@
 import { Router } from 'express';
 // Replace these function names with the actual ones inside your matchController!
-import { getMatches,getMatch, generateTeams, createMatch, updateMatch, deleteMatch } from '../controllers/matchController.js';
+import { getMatches,getMatch, generateTeams, createMatch, updateMatch, deleteMatch, completeMatch } from '../controllers/matchController.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
 
@@ -16,5 +16,6 @@ router.route('/:id')
     .delete(protect, deleteMatch);
 
 router.post('/:id/generate', protect, generateTeams);
+router.post('/:id/complete', protect, completeMatch);
 
 export default router;

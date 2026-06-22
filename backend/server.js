@@ -68,7 +68,18 @@ app.use(cors(corsOptions));
 
 // Security & parsing
 app.use(helmet({
-    contentSecurityPolicy: false, // Important: Sometimes helmet blocks Angular from loading its own scripts
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+            imgSrc: ["'self'", "data:", "https://*", "http://*"],
+            connectSrc: ["'self'", "https://*", "http://*"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: [],
+        },
+    },
     crossOriginEmbedderPolicy: false
 }));
 app.use(express.json());
