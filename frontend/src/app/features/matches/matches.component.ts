@@ -189,10 +189,15 @@ export class MatchesComponent implements OnInit {
 
   createMatch() {
     this.matchService.createMatch(this.newMatch).subscribe({
-      next: (created: Match) => {
-        this.matches.update(m => [created, ...m]);
+      next: (res) => {
+        this.matches.update(m => [res.match, ...m]);
         this.showAddForm.set(false);
         this.newMatch = { place: '', date: '', time: '' };
+        
+        // Show AI conflict warning if present
+        if (res.conflictWarning) {
+          alert('🗓️ Scheduling Alert: ' + res.conflictWarning);
+        }
       }
     });
   }
