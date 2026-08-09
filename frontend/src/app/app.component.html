@@ -23,13 +23,7 @@
       </div>
 
       <div class="flex items-center gap-4 order-2 md:order-3">
-        <!-- Install PWA Button -->
-        <button *ngIf="pwaService.showInstallButton()" 
-                (click)="pwaService.installPwa()"
-                class="flex items-center gap-2 px-5 py-2.5 bg-accent-light dark:bg-accent-dark text-white text-[10px] font-black rounded-full shadow-lg hover:scale-105 transition-all hover:shadow-accent-light/40 dark:hover:shadow-accent-dark/40 uppercase tracking-widest active:scale-95">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-          INSTALL
-        </button>
+        <!-- PWA Button moved to Navbar -->
 
         <a href="https://github.com/khaledwaleed100" target="_blank" class="w-10 h-10 rounded-full border border-gray-200 dark:border-slate-800 flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-900 dark:hover:border-white transition-all">
           <span class="sr-only">GitHub</span>

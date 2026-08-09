@@ -135,7 +135,8 @@ const generateTeams = asyncHandler(async (req, res) => {
 // @route   POST /api/matches/:id/complete
 // @access  Private
 const completeMatch = asyncHandler(async (req, res) => {
-    const { finalScore, playerStats } = req.body;
+    let { playerStats } = req.body;
+    playerStats = playerStats || [];
 
     const match = await Match.findOne({ _id: req.params.id, userId: req.user.id });
     if (!match) {
@@ -143,18 +144,55 @@ const completeMatch = asyncHandler(async (req, res) => {
         throw new Error('Match not found');
     }
 
-    if (match.status === 'completed') {
-        res.status(400);
-        throw new Error('Match is already completed');
+    const isAlreadyCompleted = match.status === 'completed';
+
+    // 1. Auto-calculate final score based on player goals
+    let teamAGoals = 0;
+    let teamBGoals = 0;
+
+    const teamAIds = match.teamA.map(id => id.toString());
+    const teamBIds = match.teamB.map(id => id.toString());
+
+    for (const stat of playerStats) {
+        const pid = stat.playerId?.toString();
+        const goals = stat.goals || 0;
+        if (teamAIds.includes(pid)) teamAGoals += goals;
+        else if (teamBIds.includes(pid)) teamBGoals += goals;
     }
 
+    match.finalScore = { teamA: teamAGoals, teamB: teamBGoals };
     match.status = 'completed';
-    if (finalScore) match.finalScore = finalScore;
-    if (playerStats) match.playerStats = playerStats;
+
+    // 2. Undo previous stats if modifying an already completed match
+    if (isAlreadyCompleted && match.playerStats?.length > 0) {
+        for (const oldStat of match.playerStats) {
+            const player = await Player.findById(oldStat.playerId);
+            if (player) {
+                // Subtract old stats safely
+                player.stats.matchesPlayed = Math.max(0, (player.stats.matchesPlayed || 1) - 1);
+                player.stats.goals = Math.max(0, (player.stats.goals || 0) - (oldStat.goals || 0));
+                player.stats.assists = Math.max(0, (player.stats.assists || 0) - (oldStat.assists || 0));
+                if (oldStat.isMvp) {
+                    player.stats.mvpAwards = Math.max(0, (player.stats.mvpAwards || 1) - 1);
+                }
+
+                // Remove the old goals from recentGoals array (remove last occurrence)
+                if (player.recentGoals && player.recentGoals.length > 0) {
+                    const idx = player.recentGoals.lastIndexOf(oldStat.goals || 0);
+                    if (idx !== -1) {
+                        player.recentGoals.splice(idx, 1);
+                    }
+                }
+                await player.save();
+            }
+        }
+    }
+
+    match.playerStats = playerStats;
 
     // AI Feature 3: Automated MVP Suggestion
-    const mvpAlreadySet = playerStats?.some(s => s.isMvp);
-    if (!mvpAlreadySet && playerStats?.length > 0 && process.env.GEMINI_API_KEY) {
+    const mvpAlreadySet = playerStats.some(s => s.isMvp);
+    if (!mvpAlreadySet && playerStats.length > 0 && process.env.GEMINI_API_KEY) {
         try {
             const playerIds = playerStats.map(s => s.playerId);
             const players = await Player.find({ _id: { $in: playerIds } });
@@ -167,16 +205,16 @@ const completeMatch = asyncHandler(async (req, res) => {
 
     await match.save();
 
-    // Update all participating players' all-time stats + performance trend
+    // 3. Apply new stats
     if (playerStats && playerStats.length > 0) {
         for (const stat of playerStats) {
             const player = await Player.findById(stat.playerId);
             if (player) {
-                player.stats.matchesPlayed += 1;
-                player.stats.goals += stat.goals || 0;
-                player.stats.assists += stat.assists || 0;
+                player.stats.matchesPlayed = (player.stats.matchesPlayed || 0) + 1;
+                player.stats.goals = (player.stats.goals || 0) + (stat.goals || 0);
+                player.stats.assists = (player.stats.assists || 0) + (stat.assists || 0);
                 if (stat.isMvp) {
-                    player.stats.mvpAwards += 1;
+                    player.stats.mvpAwards = (player.stats.mvpAwards || 0) + 1;
                 }
 
                 // Track recent goals for trend (keep last 5 matches)
@@ -188,12 +226,14 @@ const completeMatch = asyncHandler(async (req, res) => {
                     const last3 = recentGoals.slice(-3);
                     const totalRecent = last3.reduce((a, b) => a + b, 0);
                     if (last3.every(g => g > 0)) {
-                        player.performanceTrend = 'hot'; // scored in each of last 3 matches
+                        player.performanceTrend = 'hot';
                     } else if (totalRecent === 0 && recentGoals.length >= 3) {
-                        player.performanceTrend = 'cold'; // no goals in last 3 matches
+                        player.performanceTrend = 'cold';
                     } else {
                         player.performanceTrend = 'stable';
                     }
+                } else {
+                    player.performanceTrend = 'stable';
                 }
 
                 await player.save();
