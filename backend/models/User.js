@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
     tempResetTokenExpire: Date
 }, { timestamps: true });
 
-userSchema.pre('save', async function() {
+userSchema.pre('save', async function () {
     if (this.isModified('passwordHash')) {
         const salt = await bcrypt.genSalt(10);
         this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
@@ -27,13 +27,12 @@ userSchema.pre('save', async function() {
     }
 });
 
-userSchema.methods.matchPassword = async function(enteredPassword) {
+userSchema.methods.matchPassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.passwordHash);
 };
 
-userSchema.methods.matchSecurityAnswer = async function(enteredAnswer) {
+userSchema.methods.matchSecurityAnswer = async function (enteredAnswer) {
     if (!this.securityAnswerHash) return false;
-    // We lowercase and trim the entered answer to make it slightly forgiving
     const normalizedAnswer = enteredAnswer.toLowerCase().trim();
     return await bcrypt.compare(normalizedAnswer, this.securityAnswerHash);
 };
@@ -41,8 +40,3 @@ userSchema.methods.matchSecurityAnswer = async function(enteredAnswer) {
 const User = mongoose.model('User', userSchema);
 
 export default User;
-export const findOne = (query) => User.findOne(query);
-export const create = (data) => User.create(data);
-export const findById = (id) => User.findById(id);
-export const find = (query) => User.find(query);
-export const countDocuments = () => User.countDocuments();

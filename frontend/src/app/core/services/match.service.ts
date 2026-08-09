@@ -24,6 +24,12 @@ export interface Match {
     assists: number;
     isMvp: boolean;
   }[];
+  aiMvpSuggestion?: string | null;
+}
+
+export interface CreateMatchResponse {
+  match: Match;
+  conflictWarning: string | null;
 }
 
 @Injectable({
@@ -41,8 +47,8 @@ export class MatchService {
     return this.http.get<Match>(`${this.apiUrl}/${id}`);
   }
 
-  createMatch(match: Partial<Match>): Observable<Match> {
-    return this.http.post<Match>(this.apiUrl, match);
+  createMatch(match: Partial<Match>): Observable<CreateMatchResponse> {
+    return this.http.post<CreateMatchResponse>(this.apiUrl, match);
   }
 
   updateMatch(id: string, match: Partial<Match>): Observable<Match> {

@@ -12,6 +12,7 @@ import matchRoutes from './routes/matchRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import notesRoutes from './routes/notes.js';
+import statsRoutes from './routes/statsRoutes.js';
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
 import cookieParser from 'cookie-parser';
 
@@ -38,19 +39,17 @@ connectDB();
 // CORS — must be FIRST middleware before helmet and everything else
 const allowedOrigins = [
     'http://localhost:4200',
-    'https://five-a-side-manager-frontend.vercel.app',
     process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 const corsOptions = {
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
-        
-        // Allow Vercel and Render dynamic URLs
-        const isAllowed = allowedOrigins.includes(origin) || 
-                         origin.endsWith('.vercel.app') || 
-                         origin.endsWith('.onrender.com');
-        
+
+        const isAllowed =
+            allowedOrigins.includes(origin) ||
+            origin.endsWith('.onrender.com');
+
         if (isAllowed) {
             callback(null, true);
         } else {
@@ -74,13 +73,14 @@ app.use(helmet({
 }));
 app.use(express.json());
 app.use(cookieParser());
+
 // Rate limiting
 app.use('/api', apiLimiter);
 
 // Health check endpoint (no rate limit)
 app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'ok', 
+    res.json({
+        status: 'ok',
         timestamp: new Date().toISOString(),
         uptime: process.uptime()
     });
@@ -93,8 +93,9 @@ app.use('/api/matches', matchRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notes', notesRoutes);
+app.use('/api/stats', statsRoutes);
 
-// Serve Frontend in Production / Unified Deployment
+// Serve Frontend in Production (Render unified deployment)
 const frontendPath = path.join(__dirname, '../frontend/dist/frontend/browser');
 app.use(express.static(frontendPath));
 
@@ -110,23 +111,17 @@ app.use((req, res, next) => {
 app.use(notFound);
 app.use(errorHandler);
 
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-    const server = app.listen(PORT, () => {
-        console.log(`http://localhost:${PORT}`);
-    });
+// Start the server (always — Render sets PORT via env)
+const server = app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
+});
 
-    process.on('unhandledRejection', (err) => {
-        console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-        console.error(err.name, err.message, err.stack);
-        server.close(() => {
-            process.exit(1);
-        });
+process.on('unhandledRejection', (err) => {
+    console.error('UNHANDLED REJECTION! 💥 Shutting down...');
+    console.error(err.name, err.message, err.stack);
+    server.close(() => {
+        process.exit(1);
     });
-} else if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
-    // In production on Render/Heroku etc., start the server normally
-    const server = app.listen(PORT, () => {
-        console.log(`Production Server running on port ${PORT}`);
-    });
-}
+});
 
 export default app;

@@ -18,14 +18,10 @@ const matchSchema = new mongoose.Schema({
         goals: { type: Number, default: 0 },
         assists: { type: Number, default: 0 },
         isMvp: { type: Boolean, default: false }
-    }]
+    }],
+    aiMvpSuggestion: { type: String, default: null }
 }, { timestamps: true });
 
 const Match = mongoose.model('Match', matchSchema);
 
 export default Match;
-export const find = (query) => Match.find(query);
-export const findOne = (query) => Match.findOne(query);
-export const create = (data) => Match.create(data);
-export const findById = (id) => Match.findById(id);
-export const findByIdAndUpdate = (id, data) => Match.findByIdAndUpdate(id, data, { new: true });
