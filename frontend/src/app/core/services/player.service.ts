@@ -93,6 +93,12 @@ export class PlayerService {
     );
   }
 
+  deleteAllPlayers(): Observable<{ message: string; count: number }> {
+    return this.http.delete<{ message: string; count: number }>(this.apiUrl).pipe(
+      tap(() => this.players.set([]))
+    );
+  }
+
   uploadAvatar(id: string, file: File): Observable<{ avatarUrl: string }> {
     const formData = new FormData();
     formData.append('avatar', file);

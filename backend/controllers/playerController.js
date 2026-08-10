@@ -184,11 +184,32 @@ const getAiReport = asyncHandler(async (req, res) => {
     res.json({ report, cached: false });
 });
 
+// @desc    Delete ALL players for a user
+// @route   DELETE /api/players
+// @access  Private
+const deleteAllPlayers = asyncHandler(async (req, res) => {
+    const players = await Player.find({ userId: req.user.id });
+
+    // Delete all Cloudinary avatars in parallel (non-critical)
+    await Promise.allSettled(
+        players
+            .filter(p => p.avatarUrl)
+            .map(p => {
+                const publicId = p.avatarUrl.split('/').pop().split('.')[0];
+                return cloudinary.uploader.destroy(`five-a-side/avatars/${publicId}`);
+            })
+    );
+
+    await Player.deleteMany({ userId: req.user.id });
+    res.json({ message: 'All players deleted', count: players.length });
+});
+
 export {
     getPlayers,
     createPlayer,
     updatePlayer,
     deletePlayer,
     uploadAvatar,
-    getAiReport
+    getAiReport,
+    deleteAllPlayers
 };

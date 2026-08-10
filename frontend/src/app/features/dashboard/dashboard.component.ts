@@ -22,6 +22,7 @@ export class DashboardComponent implements OnInit {
 
   weatherData = signal<WeatherData | null>(null);
   isLoading = signal(true);
+  isDeletingAll = signal(false);
 
   showAddForm = signal(false);
   isEditing = signal(false);
@@ -119,6 +120,15 @@ export class DashboardComponent implements OnInit {
     if (confirm('Delete this player?')) {
       this.playerService.deletePlayer(id).subscribe();
     }
+  }
+
+  deleteAllPlayers() {
+    if (!confirm(`Delete ALL ${this.playerService.players().length} players? This cannot be undone.`)) return;
+    this.isDeletingAll.set(true);
+    this.playerService.deleteAllPlayers().subscribe({
+      next: () => this.isDeletingAll.set(false),
+      error: () => this.isDeletingAll.set(false),
+    });
   }
 
   onAttrChange(key: keyof Player['attributes'], value: number) {

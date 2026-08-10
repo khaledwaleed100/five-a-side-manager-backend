@@ -146,6 +146,18 @@ body {
   100% { transform: scale(1); }
 }
 
+/* Slide in from right (PWA banner) */
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(120px) scale(0.9); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Slide out to right */
+@keyframes slide-out-right {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(120px); }
+}
+
 /* ============================================================
    Utility Classes
    ============================================================ */
@@ -311,17 +323,63 @@ body {
   .scroll-top-btn.hidden-btn { opacity: 0; pointer-events: none; transform: translateY(16px) scale(0.8); }
   .scroll-top-btn.visible-btn { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
 
-  /* --- PWA Install Banner --- */
+  /* --- PWA Install Banner — right-side notification --- */
   .pwa-banner {
-    @apply fixed bottom-0 left-0 right-0 z-50 p-4;
-    animation: slide-up 0.4s var(--ease-spring) both;
+    @apply fixed bottom-6 right-4 z-50 max-w-[320px] w-[calc(100vw-2rem)];
+    animation: slide-in-right 0.45s var(--ease-spring) both;
   }
   .pwa-banner-card {
-    @apply max-w-md mx-auto rounded-2xl p-4 flex items-center gap-3 shadow-2xl;
+    @apply rounded-2xl p-4 shadow-2xl;
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
   }
+
+  /* --- Pitch grass with stripe pattern --- */
+  .pitch-grass {
+    background-color: #15803d;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 80px,
+        rgba(0,0,0,0.06) 80px,
+        rgba(0,0,0,0.06) 160px
+      );
+  }
+  /* On mobile the pitch is vertical, so stripes go horizontal */
+  @media (max-width: 767px) {
+    .pitch-grass {
+      background-image:
+        repeating-linear-gradient(
+          180deg,
+          transparent 0px,
+          transparent 60px,
+          rgba(0,0,0,0.06) 60px,
+          rgba(0,0,0,0.06) 120px
+        );
+    }
+  }
+
+  /* --- Premium pitch player card --- */
+  .pitch-player-card {
+    position: relative;
+    border-radius: 0.625rem;
+    overflow: hidden;
+    border-width: 1px;
+    border-style: solid;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+    transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease;
+  }
+  .pitch-player-card:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 16px 32px rgba(0,0,0,0.6), 0 0 12px rgba(255,255,255,0.1);
+  }
+  .pitch-card-fwd { border-color: rgba(239,68,68,0.5); }
+  .pitch-card-def { border-color: rgba(59,130,246,0.5); }
+  .pitch-card-mid { border-color: rgba(34,197,94,0.5); }
+  .pitch-card-gk  { border-color: rgba(234,179,8,0.5); }
 
   /* --- Modal animations --- */
   .modal-backdrop { animation: fade-in 0.2s ease both; }
