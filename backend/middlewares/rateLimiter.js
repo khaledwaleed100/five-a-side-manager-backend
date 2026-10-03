@@ -7,9 +7,19 @@ const apiLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => {
-        // Don't rate limit on /health check
-        return req.path === '/health';
+        // Don't rate limit on /health check.
+        // Polls are limited separately: friends voting from the same venue Wi-Fi share one IP
+        // and phones refresh an open poll, which would otherwise burn the shared 100/15min budget.
+        return req.path === '/health' || req.path.startsWith('/polls');
     },
+});
+
+const pollLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 120, // ~ a dozen phones on one Wi-Fi, each refreshing every 20-30s plus votes
+    message: { message: 'Too many poll requests, slow down for a moment.' },
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 
 const authLimiter = rateLimit({
@@ -20,4 +30,4 @@ const authLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-export { apiLimiter, authLimiter };
+export { apiLimiter, authLimiter, pollLimiter };

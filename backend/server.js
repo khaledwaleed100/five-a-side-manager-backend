@@ -13,6 +13,7 @@ import feedbackRoutes from './routes/feedbackRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import notesRoutes from './routes/notes.js';
 import statsRoutes from './routes/statsRoutes.js';
+import pollRoutes from './routes/pollRoutes.js';
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
 import cookieParser from 'cookie-parser';
 
@@ -94,6 +95,7 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/polls', pollRoutes);
 
 // Serve Frontend in Production (Render unified deployment)
 const frontendPath = path.join(__dirname, '../frontend/dist/frontend/browser');

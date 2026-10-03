@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { PwaService } from '../../../core/services/pwa.service';
+import { PollService } from '../../../core/services/poll.service';
 
 @Component({
   selector: 'app-navbar',
@@ -14,9 +15,14 @@ import { PwaService } from '../../../core/services/pwa.service';
 export class NavbarComponent implements OnInit {
   authService = inject(AuthService);
   pwaService = inject(PwaService);
+  pollService = inject(PollService);
   isDarkMode = signal(false);
 
   ngOnInit() {
+    // Prime the "vote waiting" badge (one cheap request; the vote page does live refresh itself).
+    if (this.authService.isAuthenticated()) {
+      this.pollService.refresh().catch(() => undefined);
+    }
     // Check system preference or localStorage
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       this.isDarkMode.set(true);

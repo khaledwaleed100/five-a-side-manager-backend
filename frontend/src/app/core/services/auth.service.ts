@@ -5,6 +5,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { Observable, of, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { PollService } from './poll.service';
 
 export interface User {
   _id: string;
@@ -20,6 +21,7 @@ export interface User {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private pollService = inject(PollService);
   private apiUrl = `${environment.apiUrl}/auth`;
 
   currentUser = signal<User | null>(null);
@@ -47,6 +49,7 @@ export class AuthService {
   login(email: string, password: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, { email, password }, { withCredentials: true }).pipe(
       tap((res: any) => {
+        this.pollService.reset();
         this.token.set(res.accessToken);
         const user: User = { _id: res._id, name: res.name, email: res.email, preferences: res.preferences, isAdmin: res.isAdmin };
         this.currentUser.set(user);
@@ -93,6 +96,7 @@ export class AuthService {
   }
 
   clearSession() {
+    this.pollService.reset();
     this.token.set(null);
     this.currentUser.set(null);
     localStorage.removeItem('accessToken');

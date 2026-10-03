@@ -17,7 +17,8 @@ const matchSchema = new mongoose.Schema({
         playerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Player' },
         goals: { type: Number, default: 0 },
         assists: { type: Number, default: 0 },
-        isMvp: { type: Boolean, default: false }
+        isMvp: { type: Boolean, default: false },
+        matchRating: { type: Number, default: 0 }
     }],
     aiMvpSuggestion: { type: String, default: null }
 }, { timestamps: true });

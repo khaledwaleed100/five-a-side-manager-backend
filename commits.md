@@ -1,0 +1,44 @@
+# Commit History
+
+- **cb3ec0c** - 2026-08-10 - *fiskjaw* : fixed the cards flip glitch
+- **456410c** - 2026-08-10 - *fiskjaw* : fixed the cards flip glitch
+- **1115392** - 2026-08-10 - *fiskjaw* : fixing and improving player cards , adding delete all players and improving the pitch shape
+- **fd6e394** - 2026-08-10 - *fiskjaw* : user experience adjust , adjust pwa ,offline handling
+- **1af27de** - 2026-08-09 - *fiskjaw* : fix: pitch container bounds clipping players on mobile
+- **2315fbd** - 2026-08-09 - *fiskjaw* : fix: navbar layout collision and pwa install fallback
+- **b4682ed** - 2026-08-09 - *fiskjaw* : feat: complete match score auto-calculation and PWA integration
+- **834df93** - 2026-08-09 - *fiskjaw* : fix: match.service CreateMatchResponse type mismatch in component
+- **cf4fdf9** - 2026-08-09 - *fiskjaw* : feat: complete refactoring, AI integration, and new features
+- **05a7b1e** - 2026-06-22 - *fiskjaw* : domain fix
+- **58689a5** - 2026-06-22 - *fiskjaw* : helmet settings fix
+- **ed22cb4** - 2026-06-22 - *fiskjaw* : security fix
+- **59e21cb** - 2026-06-22 - *fiskjaw* : again package fix
+- **faef4d6** - 2026-06-22 - *fiskjaw* : pacage fix
+- **9e0916c** - 2026-06-22 - *fiskjaw* : smoothnees and 2newfeatures
+- **88ae358** - 2026-05-09 - *fiskjaw* : UI Polish: Make floating navbar responsive on small screens
+- **45b8345** - 2026-05-09 - *fiskjaw* : Restore original PWA icons in manifest and index.html
+- **72bcac4** - 2026-05-09 - *fiskjaw* : Fix Tailwind CSS conflicting margin-top classes in matches component
+- **1a3d81a** - 2026-05-09 - *fiskjaw* : UI Polish: Add date/time icons to match form and password visibility toggle
+- **fdb9f01** - 2026-05-09 - *fiskjaw* : Fix duplicate /api prefixes in frontend service URLs
+- **108400b** - 2026-05-09 - *fiskjaw* : Fix Mongoose async hook throwing 'next is not a function'
+- **ce9b1b3** - 2026-05-09 - *fiskjaw* : Allow Render origins in CORS policy
+- **cd83190** - 2026-05-09 - *fiskjaw* : Fix Express 5 wildcard routing error
+- **a7680ea** - 2026-05-09 - *fiskjaw* : Fix backend dependencies not installing on Render
+- **044aef6** - 2026-05-09 - *fiskjaw* : Remove obsolete reset-password component (now integrated into forgot-password flow)
+- **1f91628** - 2026-05-09 - *fiskjaw* : Fix Angular CLI not found by forcing devDependencies install
+- **c69e02f** - 2026-05-09 - *fiskjaw* : Add root package.json for Render, remove unused packages
+- **c97fb87** - 2026-05-09 - *fiskjaw* : unified deployment , fixing he forgotpass flow,fixing cors issues
+- **ef074b9** - 2026-05-02 - *fiskjaw* : fixing some imports
+- **0c0202f** - 2026-05-01 - *fiskjaw* : fix: flexible CORS, fixed pre-save middleware hang, and added logging
+- **9cc781c** - 2026-05-01 - *fiskjaw* : fix: move CORS before helmet + explicit OPTIONS preflight handler for cross-origin
+- **1b13aa2** - 2026-05-01 - *fiskjaw* : fix: add trust proxy for Render GÇö fixes rate limiter 504 on shared proxy IP
+- **1c67d01** - 2026-05-01 - *fiskjaw* : fix: use sameSite=None for cross-origin cookie support (Vercel <-> Render)
+- **a67fe4e** - 2026-05-01 - *fiskjaw* : fix: simplify vercel.json GÇö remove static-build config, keep only SPA rewrite
+- **a69f32e** - 2026-05-01 - *fiskjaw* : deployment fix
+- **e3d049e** - 2026-05-01 - *fiskjaw* : fix: production CORS uses FRONTEND_URL env var + add vercel.json for SPA routing
+- **873e09d** - 2026-05-01 - *fiskjaw* : deploying back
+- **1ebca84** - 2026-05-01 - *fiskjaw* : feat: restore full source tracking GÇö pitch layout, mobile vertical pitch, unified stats panel, weather export, manual team assignment
+- **bff2656** - 2026-04-30 - *fiskjaw* : Fixing frontend folder structure for Vercel
+- **69357cb** - 2026-04-30 - *fiskjaw* : Merge branch 'main' of https://github.com/khaledwaleed100/5_Aside
+- **002d376** - 2026-04-30 - *fiskjaw* : Finalizing MatchDetail and DB connection fix for deployment
+- **150ffee** - 2026-04-30 - *khaled waleed* : Initial commit

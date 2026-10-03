@@ -3,6 +3,7 @@ import Player from '../models/Player.js';
 import { balanceTeams } from '../services/balancingService.js';
 import { getAiMvpSuggestion, checkSchedulingConflict } from '../services/aiService.js';
 import { sendMatchCreationEmail } from '../services/emailService.js';
+import { calculateMatchRating } from '../services/ratingService.js';
 import asyncHandler from '../middlewares/asyncHandler.js';
 
 // @desc    Get all matches for a user
@@ -186,6 +187,11 @@ const completeMatch = asyncHandler(async (req, res) => {
                 await player.save();
             }
         }
+    }
+
+    // Calculate match ratings before saving
+    for (const stat of playerStats) {
+        stat.matchRating = calculateMatchRating(stat);
     }
 
     match.playerStats = playerStats;

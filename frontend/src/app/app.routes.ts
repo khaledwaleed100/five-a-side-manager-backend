@@ -8,6 +8,7 @@ import { MatchDetailComponent } from './features/match-detail/match-detail.compo
 import { FeedbackComponent } from './features/feedback/feedback.component';
 import { AdminDashboardComponent } from './features/admin-dashboard/admin-dashboard.component';
 import { NotesComponent } from './features/notes/notes.component';
+import { PollsComponent } from './features/polls/polls.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -20,6 +21,7 @@ export const routes: Routes = [
   { path: 'feedback', component: FeedbackComponent, canActivate: [authGuard] },
   { path: 'admin', component: AdminDashboardComponent, canActivate: [authGuard] },
   { path: 'notes', component: NotesComponent, canActivate: [authGuard] },
+  { path: 'vote', component: PollsComponent, canActivate: [authGuard] },
   { path: '', redirectTo: '/matches', pathMatch: 'full' },
   { path: '**', redirectTo: '/matches' }
 ];

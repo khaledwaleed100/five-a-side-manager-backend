@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MatchService, Match } from '../../core/services/match.service';
+import { PollHubCardComponent } from '../../shared/components/poll-hub-card/poll-hub-card.component';
 
 @Component({
   selector: 'app-matches',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, PollHubCardComponent],
   template: `
     <div class="container mx-auto px-4 py-8 animate-fade-in relative">
       <!-- Decorative Background Elements -->
@@ -37,6 +38,8 @@ import { MatchService, Match } from '../../core/services/match.service';
           </button>
         </div>
       </div>
+
+      <app-poll-hub-card></app-poll-hub-card>
 
       <!-- Add Match Form -->
       <div *ngIf="showAddForm()" class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl shadow-xl mb-8 animate-slide-up border border-gray-100 dark:border-gray-800">

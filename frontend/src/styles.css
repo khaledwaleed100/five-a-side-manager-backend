@@ -208,10 +208,10 @@ body {
   }
 
   /* --- 3D card utilities --- */
-  .perspective-1000 { perspective: 1000px; }
-  .preserve-3d      { transform-style: preserve-3d; }
-  .backface-hidden  { backface-visibility: hidden; }
-  .rotate-y-180     { transform: rotateY(180deg); }
+  .perspective-1000 { perspective: 1000px; -webkit-perspective: 1000px; }
+  .preserve-3d      { transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
+  .backface-hidden  { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .rotate-y-180     { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); }
 
   /* --- Trend badges --- */
   .trend-hot    { color: var(--color-trend-hot); }
@@ -466,9 +466,11 @@ body {
    ============================================================ */
 .perspective-1000 {
   perspective: 1000px;
+  -webkit-perspective: 1000px;
 }
 .preserve-3d {
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
 }
 .backface-hidden {
   backface-visibility: hidden;
@@ -476,4 +478,121 @@ body {
 }
 .rotate-y-180 {
   transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+}
+
+/* ============================================================
+   Voting UI + mobile app shell (phone-first)
+   ============================================================ */
+
+/* Remove 300ms tap delay + grey tap flash on every interactive element */
+button, a, [role="button"], [role="radio"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.vote-card {
+  border-color: #e5e7eb;
+  transition: transform 0.22s var(--ease-spring), box-shadow 0.22s ease, border-color 0.15s ease, background-color 0.2s ease;
+  will-change: transform;
+}
+.dark .vote-card { border-color: #334155; }
+.vote-card:not(:disabled):active { transform: scale(0.975); }
+.vote-card:disabled { cursor: default; }
+.vote-card.selected {
+  border-color: var(--color-danger);
+  transform: translateY(-2px) scale(1.012);
+  box-shadow: 0 12px 28px rgba(220, 38, 38, 0.22);
+}
+.vote-card.mine { border-color: #10b981; }
+.vote-card.winner {
+  border-color: #f59e0b;
+  box-shadow: 0 10px 28px rgba(245, 158, 11, 0.25);
+}
+
+.result-fill {
+  background: linear-gradient(90deg, rgba(244, 63, 94, 0.20), rgba(244, 63, 94, 0.07));
+  transition: width 0.8s var(--ease-smooth);
+  animation: stat-bar-grow 0.9s var(--ease-smooth) both;
+}
+.vote-card.mine .result-fill   { background: linear-gradient(90deg, rgba(16, 185, 129, 0.28), rgba(16, 185, 129, 0.08)); }
+.vote-card.winner .result-fill { background: linear-gradient(90deg, rgba(245, 158, 11, 0.30), rgba(245, 158, 11, 0.08)); }
+
+/* Sticky confirm bar — floats above the mobile tab bar, respects the iPhone home indicator */
+.vote-bar {
+  position: fixed;
+  left: 0; right: 0; z-index: 45;
+  bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  padding: 0.75rem 1rem;
+  background: color-mix(in srgb, var(--color-bg-card) 88%, transparent);
+  border-top: 1px solid var(--color-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.12);
+  animation: sheet-up 0.32s var(--ease-spring) both;
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.vote-toast {
+  position: fixed; left: 50%; z-index: 60;
+  bottom: calc(9.5rem + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  padding: 0.75rem 1.25rem;
+  border-radius: 9999px;
+  background: #111827; color: #fff;
+  font-weight: 800; font-size: 0.875rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  animation: toast-pop 0.35s var(--ease-spring) both;
+  white-space: nowrap;
+}
+@keyframes toast-pop {
+  from { opacity: 0; transform: translate(-50%, 16px) scale(0.9); }
+  to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+/* Mobile bottom tab bar (thumb zone) */
+.mobile-tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--color-bg-card) 90%, transparent);
+  border-top: 1px solid var(--color-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.mobile-tab {
+  position: relative;
+  flex: 1; min-height: 3.25rem; border-radius: 1rem;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.03em;
+  color: #6b7280;
+  transition: transform 0.15s var(--ease-spring), color 0.2s ease, background-color 0.2s ease;
+}
+.dark .mobile-tab { color: #94a3b8; }
+.mobile-tab:active { transform: scale(0.9); }
+.mobile-tab.active { color: #dc2626; background: rgba(220, 38, 38, 0.1); }
+.dark .mobile-tab.active { color: #fb7185; background: rgba(244, 63, 94, 0.14); }
+.tab-badge {
+  position: absolute; top: 4px; left: 50%; margin-left: 6px;
+  min-width: 1.1rem; height: 1.1rem; padding: 0 0.3rem;
+  border-radius: 9999px; background: #ef4444; color: #fff;
+  font-size: 10px; font-weight: 900; line-height: 1.1rem; text-align: center;
+  box-shadow: 0 0 0 2px var(--color-bg-card);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Keep floating widgets clear of the bottom tab bar on phones */
+@media (max-width: 639px) {
+  .scroll-top-btn { bottom: calc(5.25rem + env(safe-area-inset-bottom)); right: 1rem; }
+  .pwa-banner     { bottom: calc(5.25rem + env(safe-area-inset-bottom)); }
+}
+@media (min-width: 640px) {
+  .vote-bar   { bottom: 1rem; left: 0; right: 0; margin-inline: auto; width: min(42rem, calc(100% - 2rem)); border-radius: 1.5rem; border: 1px solid var(--color-border); }
+  .vote-toast { bottom: 6.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vote-card, .result-fill, .vote-bar, .vote-toast, .mobile-tab { transition: none; animation: none; }
 }
