@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -12,17 +12,34 @@ import { PollService } from '../../../core/services/poll.service';
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './navbar.component.html'
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
   pwaService = inject(PwaService);
   pollService = inject(PollService);
   isDarkMode = signal(false);
+  private pollsLive = false;
+
+  constructor() {
+    // While logged in, keep polls fresh app-wide so the Vote badge lights up as soon as
+    // the admin opens a poll. PollService pauses automatically when the tab is hidden.
+    effect(() => {
+      const authed = this.authService.isAuthenticated();
+      if (authed && !this.pollsLive) {
+        this.pollsLive = true;
+        this.pollService.refresh().catch(() => undefined);
+        this.pollService.startLive();
+      } else if (!authed && this.pollsLive) {
+        this.pollsLive = false;
+        this.pollService.stopLive();
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.pollsLive) this.pollService.stopLive();
+  }
 
   ngOnInit() {
-    // Prime the "vote waiting" badge (one cheap request; the vote page does live refresh itself).
-    if (this.authService.isAuthenticated()) {
-      this.pollService.refresh().catch(() => undefined);
-    }
     // Check system preference or localStorage
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       this.isDarkMode.set(true);

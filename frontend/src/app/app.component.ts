@@ -31,7 +31,10 @@ export class AppComponent {
 
   @HostListener('window:scroll', [])
   onScroll() {
-    this.showScrollTop.set(window.scrollY > 300);
+    const shouldShow = window.scrollY > 300;
+    if (shouldShow !== this.showScrollTop()) {
+      this.showScrollTop.set(shouldShow);
+    }
   }
 
   scrollToTop() {

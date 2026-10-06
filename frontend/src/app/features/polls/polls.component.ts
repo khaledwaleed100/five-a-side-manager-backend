@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Poll, PollCandidate, PollService } from '../../core/services/poll.service';
+import { AuthService } from '../../core/services/auth.service';
+import { PollHubCardComponent } from '../../shared/components/poll-hub-card/poll-hub-card.component';
 
 interface Pick { pollId: string; playerId: string; }
 
@@ -15,7 +17,7 @@ interface Pick { pollId: string; playerId: string; }
 @Component({
   selector: 'app-polls',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PollHubCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="max-w-2xl mx-auto px-3 sm:px-4 pb-52 sm:pb-16 animate-fade-in" aria-labelledby="vote-heading">
@@ -54,16 +56,27 @@ interface Pick { pollId: string; playerId: string; }
         </div>
       }
 
+      <!-- Admin / manager: start a poll right from here -->
+      <app-poll-hub-card context="vote"></app-poll-hub-card>
+
       <!-- Skeletons -->
       @if (!polls.loaded()) {
         <div class="space-y-3" aria-hidden="true">
           @for (i of [1,2,3,4]; track i) { <div class="skeleton h-[76px] rounded-2xl"></div> }
         </div>
       } @else if (polls.polls().length === 0) {
-        <div class="text-center py-16 px-6 rounded-3xl border border-dashed border-gray-300 dark:border-slate-700 bg-white/60 dark:bg-slate-900/60">
+        <div class="text-center py-14 px-6 rounded-3xl border border-dashed border-gray-300 dark:border-slate-700 bg-white/60 dark:bg-slate-900/60 animate-fade-in">
           <div class="text-5xl mb-3 animate-float">🗳️</div>
           <h2 class="text-lg font-black text-gray-900 dark:text-white">No poll open right now</h2>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">When the manager finishes the week's matches, the poll shows up here.</p>
+          @if (isAdmin()) {
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Use <span class="font-bold text-gray-700 dark:text-gray-200">Start a vote</span> above. Members get a red badge on their Vote tab the moment it opens.</p>
+          } @else {
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Your admin hasn't opened a vote yet.</p>
+            <p class="inline-flex items-center gap-2 mt-4 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+              <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse-glow"></span>
+              You'll see a badge on Vote when it opens
+            </p>
+          }
         </div>
       }
 
@@ -220,6 +233,8 @@ interface Pick { pollId: string; playerId: string; }
 })
 export class PollsComponent implements OnInit, OnDestroy {
   polls = inject(PollService);
+  private auth = inject(AuthService);
+  isAdmin = computed(() => !!this.auth.currentUser()?.isAdmin);
 
   pick$ = signal<Pick | null>(null);
   voting = signal(false);

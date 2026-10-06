@@ -158,6 +158,12 @@ body {
   to   { opacity: 0; transform: translateX(120px); }
 }
 
+/* Install icon arrow nudge */
+@keyframes install-nudge {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(2px); }
+}
+
 /* ============================================================
    Utility Classes
    ============================================================ */
@@ -317,11 +323,48 @@ body {
     @apply fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full flex items-center justify-center shadow-xl;
     background: var(--color-primary);
     color: white;
-    transition: all var(--duration-normal) var(--ease-spring);
+    /* Hidden by default so it never flashes on page load */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(16px) scale(0.8);
+    transition: opacity var(--duration-normal) ease,
+                transform var(--duration-normal) var(--ease-spring),
+                visibility 0s linear var(--duration-normal);
   }
-  .scroll-top-btn:hover { transform: translateY(-3px) scale(1.1); }
-  .scroll-top-btn.hidden-btn { opacity: 0; pointer-events: none; transform: translateY(16px) scale(0.8); }
-  .scroll-top-btn.visible-btn { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
+  .scroll-top-btn.visible-btn {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+    transition: opacity var(--duration-normal) ease,
+                transform var(--duration-normal) var(--ease-spring),
+                visibility 0s;
+  }
+  .scroll-top-btn.visible-btn:hover { transform: translateY(-3px) scale(1.1); }
+
+  /* --- Navbar install icon button --- */
+  .install-icon-btn {
+    @apply rounded-xl flex items-center justify-center text-white shrink-0;
+    background: linear-gradient(135deg, #22c55e, #059669);
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease;
+  }
+  .install-icon-btn:hover {
+    transform: translateY(-2px) scale(1.06);
+    box-shadow: 0 8px 22px rgba(16, 185, 129, 0.45);
+  }
+  .install-icon-btn:active { transform: scale(0.94); }
+  .install-icon-btn:hover .install-arrow { animation: install-nudge 0.8s ease-in-out infinite; }
+
+  /* --- Admin "Start a vote" panel --- */
+  .poll-admin-card {
+    background:
+      radial-gradient(120% 140% at 100% 0%, rgba(245, 158, 11, 0.10), transparent 55%),
+      var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 10px 30px var(--color-shadow);
+  }
 
   /* --- PWA Install Banner — right-side notification --- */
   .pwa-banner {
@@ -594,5 +637,6 @@ button, a, [role="button"], [role="radio"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vote-card, .result-fill, .vote-bar, .vote-toast, .mobile-tab { transition: none; animation: none; }
+  .vote-card, .result-fill, .vote-bar, .vote-toast, .mobile-tab,
+  .scroll-top-btn, .install-icon-btn, .install-arrow { transition: none; animation: none; }
 }

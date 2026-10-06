@@ -147,4 +147,31 @@ describe('Polls API', () => {
         const status = await request(app).get('/api/polls/status').set(auth('manager'));
         expect(status.body.weekly).toMatchObject({ pending: 0, canGenerate: false });
     });
+
+    it('lets only an admin start a poll early with fewer matches', async () => {
+        await Match.create({
+            userId: ids.manager, place: 'Cage', date: new Date(2026, 8, 10), time: '18:00', status: 'completed',
+            playerStats: [
+                { playerId: ids.ali, goals: 1, assists: 0, matchRating: 7.0 },
+                { playerId: ids.bob, goals: 0, assists: 2, matchRating: 7.4 }
+            ]
+        });
+
+        const notAdmin = await request(app).post('/api/polls/generate').set(auth('manager')).send({ type: 'weekly', force: true });
+        expect(notAdmin.status).toBe(403);
+
+        const User = (await import('../models/User.js')).default;
+        await User.updateOne({ _id: ids.manager }, { isAdmin: true });
+
+        const status = await request(app).get('/api/polls/status').set(auth('manager'));
+        expect(status.body.isAdmin).toBe(true);
+        expect(status.body.weekly).toMatchObject({ pending: 1, canGenerate: false, canForce: true });
+
+        const forced = await request(app).post('/api/polls/generate').set(auth('manager')).send({ type: 'weekly', force: true });
+        expect(forced.status).toBe(201);
+        expect(forced.body.candidates.map(c => c.name)).toEqual(['Bob', 'Ali']);
+
+        const visible = await request(app).get('/api/polls').set(auth('voter1'));
+        expect(visible.body.find(p => p._id === forced.body._id)).toMatchObject({ isActive: true, hasVoted: false });
+    });
 });

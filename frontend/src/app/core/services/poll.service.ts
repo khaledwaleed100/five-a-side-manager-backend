@@ -39,10 +39,12 @@ export interface PollTypeStatus {
   completed: number;
   pending: number;
   canGenerate: boolean;
+  /** Admin-only: poll can be opened early with fewer matches than required. */
+  canForce?: boolean;
   activePollId: string | null;
 }
 
-export type PollStatus = Record<PollType, PollTypeStatus>;
+export type PollStatus = Record<PollType, PollTypeStatus> & { isAdmin?: boolean };
 
 /** Short-poll cadence. Kept gentle: phones on mobile data, free-tier server. */
 const LIVE_INTERVAL_MS = 20_000;
@@ -173,8 +175,9 @@ export class PollService {
     }
   }
 
-  async generate(type: PollType): Promise<Poll> {
-    const poll = await firstValueFrom(this.http.post<Poll>(`${this.api}/generate`, { type }));
+  async generate(type: PollType, force = false): Promise<Poll> {
+    const body = force ? { type, force: true } : { type };
+    const poll = await firstValueFrom(this.http.post<Poll>(`${this.api}/generate`, body));
     this.polls.update(list => [poll, ...list.filter(p => p._id !== poll._id)]);
     return poll;
   }

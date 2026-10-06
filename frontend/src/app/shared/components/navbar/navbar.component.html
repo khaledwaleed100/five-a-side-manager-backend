@@ -52,12 +52,17 @@
     <!-- Actions (Install, Theme, Logout) -->
     <div class="flex items-center gap-1 sm:gap-2 relative shrink-0">
       
-      <!-- Install PWA Button (Hidden by default, shown when event fires) -->
-      <button *ngIf="pwaService.showInstallButton()" 
+      <!-- Install PWA icon button (hidden once the app is installed) -->
+      <button *ngIf="pwaService.showInstallButton()"
+              id="nav-install-btn"
               (click)="pwaService.installPwa()"
-              class="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg hover:shadow-green-500/30 transition-all hover:-translate-y-0.5">
-        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-        <span class="hidden md:inline">Install App</span>
+              class="install-icon-btn w-8 h-8 sm:w-10 sm:h-10"
+              title="Install app"
+              aria-label="Install app">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1"></path>
+          <path class="install-arrow" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 12l4 4 4-4M12 16V4"></path>
+        </svg>
       </button>
 
       <button (click)="toggleTheme()" class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">
